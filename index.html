@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1210">
+<title>PADEL KLATOVY · Bar</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #0e1210; --bg2: #161a17; --bg3: #1e2420; --card: #1a1f1c;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --green: #3ddc84; --green-dim: #1f6e42; --green-dark: #0d3d24; --green-glow: rgba(61,220,132,0.15);
+  --red: #ff6b6b; --red-dim: rgba(255,107,107,0.15);
+  --amber: #ffc542; --amber-dim: rgba(255,197,66,0.15);
+  --text: #f0f4f1; --text2: #7a8c80; --text3: #4a5c50;
+  --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif; --font-mono: 'DM Mono', monospace;
+  --radius: 12px; --radius-sm: 8px;
+}
+html, body { background: var(--bg); color: var(--text); font-family: var(--font-body); height: 100%; overflow: hidden; font-size: 15px; }
+.app { display: flex; flex-direction: column; height: 100vh; max-width: 1024px; margin: 0 auto; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 34px; height: 34px; background: var(--green); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+.logo-mark svg { width: 18px; height: 18px; }
+.logo-text { font-family: var(--font-display); font-weight: 800; font-size: 15px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); }
+.logo-sub { font-family: var(--font-mono); font-size: 10px; color: var(--green); letter-spacing: 1px; margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.clock { font-family: var(--font-mono); font-size: 13px; color: var(--text2); }
+.btn-admin { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12px; font-family: var(--font-mono); color: var(--text2); cursor: pointer; letter-spacing: 0.5px; transition: all 0.15s; }
+.btn-admin:hover { border-color: var(--green); color: var(--green); }
+
+/* SYNC STATUS */
+.sync-bar { background: var(--bg3); border-bottom: 0.5px solid var(--border); padding: 5px 20px; font-family: var(--font-mono); font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
+.sync-dot.ok { background: var(--green); }
+.sync-dot.err { background: var(--red); }
+.sync-dot.loading { background: var(--amber); animation: pulse 1s infinite; }
+
+/* TABS */
+.tabs { display: flex; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.tab { flex: 1; padding: 11px 6px; text-align: center; font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.5px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; text-transform: uppercase; }
+.tab span { display: block; font-size: 18px; margin-bottom: 3px; }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+.tab:hover:not(.active) { color: var(--text2); background: var(--bg3); }
+
+/* SCREENS */
+.screen { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* MEMBERS */
+.search-bar { padding: 12px 16px; background: var(--bg2); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.search-input { width: 100%; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; }
+.search-input:focus { outline: none; border-color: var(--green); }
+.search-input::placeholder { color: var(--text3); }
+.member-grid { padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; overflow-y: auto; flex: 1; }
+.member-card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 10px 12px; text-align: center; cursor: pointer; transition: all 0.15s; position: relative; user-select: none; }
+.member-card:hover { border-color: var(--green-dim); background: var(--bg3); transform: translateY(-1px); }
+.member-card:active { transform: scale(0.97); }
+.member-card.selected { border-color: var(--green); background: var(--green-dark); }
+.member-avatar { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: 1px; }
+.member-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+.member-family { font-size: 10px; color: var(--text3); font-family: var(--font-mono); margin-top: 2px; }
+.member-bal { font-family: var(--font-mono); font-size: 11px; margin-top: 6px; font-weight: 500; }
+.bal-ok { color: var(--green); } .bal-warn { color: var(--amber); } .bal-danger { color: var(--red); }
+.debt-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+
+/* ORDER */
+.order-layout { display: flex; flex: 1; overflow: hidden; }
+.product-panel { flex: 1; overflow-y: auto; padding: 14px; border-right: 0.5px solid var(--border); }
+.order-sidebar { width: 210px; display: flex; flex-direction: column; padding: 14px; background: var(--bg2); flex-shrink: 0; }
+.selected-member-pill { display: flex; align-items: center; gap: 10px; background: var(--green-dark); border: 0.5px solid var(--green-dim); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px; }
+.smp-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.smp-name { font-size: 13px; font-weight: 500; color: var(--green); line-height: 1.2; }
+.smp-debt { font-size: 11px; color: var(--text2); font-family: var(--font-mono); }
+.cat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin: 14px 0 8px; }
+.cat-label:first-child { margin-top: 0; }
+.product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.prod-btn { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; cursor: pointer; text-align: left; transition: all 0.12s; display: flex; flex-direction: column; gap: 3px; color: var(--text); }
+.prod-btn:hover { border-color: var(--green-dim); background: var(--bg3); }
+.prod-btn:active { transform: scale(0.96); background: var(--green-dark); }
+.prod-emoji { font-size: 20px; line-height: 1; }
+.prod-name { font-size: 13px; font-weight: 500; margin-top: 2px; }
+.prod-price { font-family: var(--font-mono); font-size: 12px; color: var(--green); }
+.cart-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; flex-shrink: 0; }
+.cart-items { flex: 1; overflow-y: auto; }
+.cart-empty { font-size: 12px; color: var(--text3); text-align: center; padding: 30px 0; font-family: var(--font-mono); }
+.cart-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; gap: 6px; }
+.ci-name { flex: 1; color: var(--text); }
+.ci-price { font-family: var(--font-mono); color: var(--green); font-size: 12px; min-width: 38px; text-align: right; }
+.ci-del { color: var(--text3); cursor: pointer; font-size: 15px; padding: 2px 4px; border-radius: 4px; line-height: 1; background: none; border: none; }
+.ci-del:hover { color: var(--red); background: var(--red-dim); }
+.cart-total { display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid var(--border2); padding-top: 10px; margin-top: 6px; flex-shrink: 0; }
+.ct-label { font-size: 12px; color: var(--text2); font-family: var(--font-mono); }
+.ct-amount { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); }
+.btn-confirm { margin-top: 10px; width: 100%; background: var(--green); color: #0a1a10; border: none; border-radius: var(--radius-sm); padding: 13px; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: 0.5px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+.btn-confirm:hover { background: #5af0a0; }
+.btn-confirm:active { transform: scale(0.98); }
+.btn-confirm:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
+.btn-clear { margin-top: 6px; width: 100%; background: transparent; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px; font-size: 12px; color: var(--text2); cursor: pointer; font-family: var(--font-mono); flex-shrink: 0; }
+.btn-clear:hover { border-color: var(--red); color: var(--red); }
+.no-member { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--text3); gap: 10px; font-family: var(--font-mono); font-size: 13px; }
+.no-member-icon { font-size: 36px; opacity: 0.4; }
+
+/* HISTORY */
+.history-filters { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 0.5px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+.filter-btn { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-family: var(--font-mono); color: var(--text2); cursor: pointer; transition: all 0.12s; }
+.filter-btn.active { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+.history-list { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.history-item { display: flex; align-items: center; gap: 12px; background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; }
+.hi-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.hi-info { flex: 1; min-width: 0; }
+.hi-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.hi-items { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hi-time { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-top: 3px; }
+.hi-amount { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--red); flex-shrink: 0; }
+
+/* ADMIN */
+.admin-screen { flex: 1; overflow-y: auto; padding: 14px; }
+.admin-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat-box { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 12px; text-align: center; }
+.stat-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; }
+.stat-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--text2); margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+.admin-section { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+.admin-section-hd { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.admin-section-hd .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.debt-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+.debt-row:last-child { border-bottom: none; }
+.debt-row-name { color: var(--text); display: flex; align-items: center; gap: 8px; }
+.debt-row-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: var(--font-display); }
+.debt-row-amt { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+.lb-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-family: var(--font-display); font-size: 15px; font-weight: 700; width: 22px; color: var(--text3); }
+.lb-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: var(--font-display); flex-shrink: 0; }
+.lb-name { flex: 1; font-size: 13px; color: var(--text); }
+.lb-amount { font-family: var(--font-mono); font-size: 13px; color: var(--text2); }
+.admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.act-btn { display: flex; align-items: center; gap: 7px; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; font-family: var(--font-mono); color: var(--text); cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
+.act-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* MODALS */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px; }
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+.modal { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 16px; padding: 24px; width: 100%; max-width: 380px; transform: translateY(10px); transition: transform 0.2s; }
+.modal-overlay.show .modal { transform: translateY(0); }
+.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+.modal-field { margin-bottom: 12px; }
+.modal-label { font-family: var(--font-mono); font-size: 11px; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
+.modal-input { width: 100%; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-family: var(--font-body); font-size: 14px; }
+.modal-input:focus { outline: none; border-color: var(--green); }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.btn-modal-primary { flex: 1; background: var(--green); color: #0a1a10; border: none; border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-display); font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn-modal-primary:hover { background: #5af0a0; }
+.btn-modal-cancel { flex: 1; background: transparent; color: var(--text2); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 14px; cursor: pointer; font-family: var(--font-mono); }
+.btn-modal-cancel:hover { border-color: var(--text2); }
+
+/* SETUP WIZARD */
+.setup-screen { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+.setup-logo { font-family: var(--font-display); font-size: 28px; font-weight: 800; letter-spacing: 2px; color: var(--green); margin-bottom: 6px; }
+.setup-sub { font-family: var(--font-mono); font-size: 12px; color: var(--text3); letter-spacing: 1px; margin-bottom: 36px; }
+.setup-card { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: 16px; padding: 24px; width: 100%; max-width: 420px; }
+.setup-step { font-family: var(--font-mono); font-size: 11px; color: var(--green); letter-spacing: 1px; margin-bottom: 8px; }
+.setup-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.setup-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; }
+.setup-desc a { color: var(--green); text-decoration: none; }
+.setup-field { margin-bottom: 12px; }
+.setup-label { font-family: var(--font-mono); font-size: 11px; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
+.setup-input { width: 100%; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text); font-family: var(--font-mono); font-size: 13px; }
+.setup-input:focus { outline: none; border-color: var(--green); }
+.setup-input::placeholder { color: var(--text3); }
+.btn-setup { width: 100%; background: var(--green); color: #0a1a10; border: none; border-radius: var(--radius-sm); padding: 14px; font-family: var(--font-display); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 8px; }
+.btn-setup:hover { background: #5af0a0; }
+.btn-skip { width: 100%; background: transparent; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px; font-size: 12px; color: var(--text3); cursor: pointer; font-family: var(--font-mono); margin-top: 8px; }
+.btn-skip:hover { color: var(--text2); border-color: var(--border2); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #0a1a10; padding: 12px 22px; border-radius: 30px; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: 0.3px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 300; white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red); color: #fff; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP WIZARD (zobrazí se při prvním spuštění) ══ -->
+<div class="setup-screen" id="setup-screen">
+  <div class="setup-logo">PADEL KLATOVY</div>
+  <div class="setup-sub">BAR SYSTÉM · PRVNÍ SPUŠTĚNÍ</div>
+  <div class="setup-card">
+    <div class="setup-step">KROK 1 / 1 — GOOGLE SHEETS PROPOJENÍ</div>
+    <div class="setup-title">Vlož URL z Apps Scriptu</div>
+    <div class="setup-desc">
+      Aby se data sdílela mezi všemi mobily a tabletem, vlož URL svého Google Apps Script deploymentu.<br><br>
+      Nemáš ještě? Otevři <a href="https://script.google.com" target="_blank">script.google.com</a>, vlož kód z README a získej URL.
+    </div>
+    <div class="setup-field">
+      <div class="setup-label">Apps Script URL</div>
+      <input class="setup-input" id="setup-url" placeholder="https://script.google.com/macros/s/..." />
+    </div>
+    <button class="btn-setup" onclick="saveSetup()">Uložit a spustit</button>
+    <button class="btn-skip" onclick="skipSetup()">Spustit bez Google Sheets (jen lokálně)</button>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="app" id="app" style="display:none">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a1a10" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M8 12 Q12 8 16 12 Q12 16 8 12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">Padel Klatovy</div>
+        <div class="logo-sub">BAR SYSTÉM</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock" id="clock">--:--</div>
+      <button class="btn-admin" onclick="showTab('admin')">ADMIN</button>
+    </div>
+  </div>
+
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-text">inicializace…</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-members" onclick="showTab('members')"><span>👥</span>členové</div>
+    <div class="tab" id="tab-order" onclick="showTab('order')"><span>🛒</span>objednávka</div>
+    <div class="tab" id="tab-history" onclick="showTab('history')"><span>📋</span>historie</div>
+    <div class="tab" id="tab-admin" onclick="showTab('admin')"><span>📊</span>přehled</div>
+  </div>
+
+  <!-- MEMBERS -->
+  <div class="screen active" id="screen-members">
+    <div class="search-bar">
+      <input class="search-input" type="text" placeholder="🔍  Hledat člena nebo přezdívku…" id="member-search" oninput="filterMembers()" autocomplete="off" />
+    </div>
+    <div class="member-grid" id="member-grid"></div>
+  </div>
+
+  <!-- ORDER -->
+  <div class="screen" id="screen-order">
+    <div class="order-layout">
+      <div class="product-panel" id="product-panel">
+        <div class="no-member" id="no-member-msg"><div class="no-member-icon">←</div><div>Nejdříve vyber člena</div></div>
+        <div id="products-container" style="display:none"></div>
+      </div>
+      <div class="order-sidebar">
+        <div class="cart-label">KOŠÍK</div>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-total">
+          <span class="ct-label">CELKEM</span>
+          <span class="ct-amount" id="cart-total">0 Kč</span>
+        </div>
+        <button class="btn-confirm" id="btn-confirm" onclick="confirmOrder()" disabled>✓ ZAPSAT NA ÚČET</button>
+        <button class="btn-clear" onclick="clearOrder()">zrušit objednávku</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="screen-history">
+    <div class="history-filters" id="history-filters"></div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="screen" id="screen-admin">
+    <div class="admin-screen">
+      <div class="admin-stats" id="admin-stats"></div>
+      <div class="admin-section" id="admin-debts"></div>
+      <div class="admin-section" id="admin-leaderboard"></div>
+      <div class="admin-section">
+        <div class="admin-section-hd"><div class="dot"></div>AKCE</div>
+        <div class="admin-actions">
+          <button class="act-btn" onclick="exportCSV()">📥 Export CSV</button>
+          <button class="act-btn" onclick="showAddMember()">➕ Přidat člena</button>
+          <button class="act-btn" onclick="showTopUp()">💳 Dobít kredit</button>
+          <button class="act-btn" onclick="showQR()">📲 QR kód</button>
+          <button class="act-btn" onclick="showProducts()">🧾 Produkty</button>
+          <button class="act-btn" onclick="reloadData()">🔄 Sync</button>
+          <button class="act-btn" onclick="resetSetup()">⚙️ Nastavení</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD MEMBER -->
+<div class="modal-overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-title">Nový člen</div>
+    <div class="modal-field"><div class="modal-label">Jméno a příjmení</div><input class="modal-input" id="new-name" placeholder="Jan Novák" /></div>
+    <div class="modal-field"><div class="modal-label">Přezdívka (volitelné)</div><input class="modal-input" id="new-nick" placeholder="Jenda" /></div>
+    <div class="modal-field"><div class="modal-label">Rodinná skupina (volitelné)</div><input class="modal-input" id="new-family" placeholder="Novákovi" /></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-member')">Zrušit</button>
+      <button class="btn-modal-primary" onclick="addMember()">Přidat</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TOP UP -->
+<div class="modal-overlay" id="modal-topup">
+  <div class="modal">
+    <div class="modal-title">Dobití kreditu / platba</div>
+    <div class="modal-field"><div class="modal-label">Člen</div><select class="modal-input" id="topup-member"></select></div>
+    <div class="modal-field"><div class="modal-label">Částka (Kč)</div><input class="modal-input" id="topup-amount" type="number" placeholder="500" min="0" /></div>
+    <div class="modal-field"><div class="modal-label">Způsob platby</div>
+      <select class="modal-input" id="topup-method">
+        <option value="hotovost">Hotovost</option>
+        <option value="převodem">Převodem</option>
+        <option value="kartou">Kartou</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-topup')">Zrušit</button>
+      <button class="btn-modal-primary" onclick="topUp()">Zaznamenat platbu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: QR -->
+<div class="modal-overlay" id="modal-qr">
+  <div class="modal" style="text-align:center">
+    <div class="modal-title">QR kód — sdílej s hráči</div>
+    <div id="qr-container" style="margin:16px auto;display:inline-block"></div>
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-top:10px">Naskenuj pro otevření na mobilu</p>
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:4px;word-break:break-all" id="qr-url"></p>
+    <div class="modal-actions"><button class="btn-modal-cancel" onclick="closeModal('modal-qr')">Zavřít</button></div>
+  </div>
+</div>
+
+<!-- MODAL: PRODUCTS -->
+<div class="modal-overlay" id="modal-products">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">Správa produktů</div>
+    <div id="products-list" style="max-height:280px;overflow-y:auto;margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 60px 60px;gap:8px;margin-bottom:10px">
+      <input class="modal-input" id="np-name" placeholder="Název" />
+      <input class="modal-input" id="np-cat" placeholder="Kategorie" />
+      <input class="modal-input" id="np-price" placeholder="Kč" type="number" />
+      <input class="modal-input" id="np-emoji" placeholder="🍺" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('modal-products')">Zavřít</button>
+      <button class="btn-modal-primary" onclick="addProduct()">Přidat</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const APP_URL = 'https://padelklatovy.github.io/padel-klatovy-bar';
+const DEBT_WARNING = 500;
+const DEBT_DANGER  = 1000;
+
+const COLORS = [
+  {bg:'#0d3d24', text:'#3ddc84', border:'#1f6e42'},
+  {bg:'#0c2a45', text:'#60b0f4', border:'#1a5080'},
+  {bg:'#3d1a0a', text:'#f0865a', border:'#7a3015'},
+  {bg:'#3d2a00', text:'#ffc542', border:'#7a5200'},
+  {bg:'#2a0d3d', text:'#c084f5', border:'#5a1a80'},
+  {bg:'#0d2e3d', text:'#5ad4e8', border:'#1a6070'},
+];
+
+function getColor(m) { return COLORS[(m.colorIdx || 0) % COLORS.length]; }
+function initials(name) { return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('pk_script_url') || '';
+let members = [];
+let products = {};
+let transactions = [];
+let selectedMember = null;
+let cart = [];
+let historyFilter = 'all';
+let syncStatus = 'idle'; // idle | loading | ok | error
+
+// Default data (použije se pokud nejsou data v Sheets)
+const DEFAULT_MEMBERS = [
+  {id:'m1', name:'Tomáš Kovář',    nick:'Tomáš',  family:'Kovářovi',  debt:0,   spent:0,  colorIdx:0},
+  {id:'m2', name:'Jana Kovářová',  nick:'Jana',   family:'Kovářovi',  debt:0,   spent:0,  colorIdx:0},
+  {id:'m3', name:'Petr Novák',     nick:'Péťa',   family:'Novák',     debt:0,   spent:0,  colorIdx:1},
+];
+const DEFAULT_PRODUCTS = {
+  'Pivo & víno': [
+    {name:'Pilsner Urquell', price:55, emoji:'🍺'},
+    {name:'Kozel tmavý',     price:50, emoji:'🍺'},
+    {name:'Radler',          price:48, emoji:'🍋'},
+    {name:'Víno (sklenka)',  price:65, emoji:'🍷'},
+  ],
+  'Nealko': [
+    {name:'Pepsi / Mirinda', price:35, emoji:'🥤'},
+    {name:'Mattoni',         price:30, emoji:'💧'},
+    {name:'Džus',            price:35, emoji:'🍊'},
+    {name:'Red Bull',        price:65, emoji:'⚡'},
+  ],
+  'Teplé nápoje': [
+    {name:'Espresso',        price:45, emoji:'☕'},
+    {name:'Cappuccino',      price:55, emoji:'☕'},
+    {name:'Čaj',             price:35, emoji:'🫖'},
+  ],
+  'Snacks': [
+    {name:'Tyčinka',         price:25, emoji:'🍫'},
+    {name:'Chips',           price:35, emoji:'🥨'},
+    {name:'Banán',           price:20, emoji:'🍌'},
+    {name:'Protein tyčinka', price:55, emoji:'💪'},
+  ],
+};
+
+// ═══════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════
+function initApp() {
+  const hasUrl = localStorage.getItem('pk_script_url');
+  const skipSetup = localStorage.getItem('pk_skip_setup');
+  if (hasUrl || skipSetup) {
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    loadData();
+  }
+  // else: setup screen stays visible
+}
+
+function saveSetup() {
+  const url = document.getElementById('setup-url').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    toast('Vlož platnou Apps Script URL', true); return;
+  }
+  SCRIPT_URL = url;
+  localStorage.setItem('pk_script_url', url);
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadData();
+}
+
+function skipSetup() {
+  localStorage.setItem('pk_skip_setup', '1');
+  members = DEFAULT_MEMBERS;
+  products = DEFAULT_PRODUCTS;
+  transactions = [];
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  setSyncStatus('error', 'offline — data se neukládají do Sheets');
+  renderMemberGrid();
+  updateClock();
+}
+
+function resetSetup() {
+  if (!confirm('Resetovat nastavení? URL scriptu bude smazána.')) return;
+  localStorage.removeItem('pk_script_url');
+  localStorage.removeItem('pk_skip_setup');
+  location.reload();
+}
+
+// ═══════════════════════════════════════════
+//  SYNC STATUS
+// ═══════════════════════════════════════════
+function setSyncStatus(status, msg) {
+  syncStatus = status;
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  dot.className = 'sync-dot ' + status;
+  txt.textContent = msg;
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE SHEETS — LOAD
+// ═══════════════════════════════════════════
+async function loadData() {
+  if (!SCRIPT_URL) {
+    members = DEFAULT_MEMBERS;
+    products = DEFAULT_PRODUCTS;
+    transactions = [];
+    setSyncStatus('error', 'Google Sheets není připojeno');
+    renderMemberGrid();
+    return;
+  }
+  setSyncStatus('loading', 'načítám data…');
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll&t=' + Date.now());
+    const data = await res.json();
+    if (data.members && data.members.length > 0) {
+      members = data.members;
+    } else {
+      members = DEFAULT_MEMBERS;
+    }
+    if (data.products && Object.keys(data.products).length > 0) {
+      products = data.products;
+    } else {
+      products = DEFAULT_PRODUCTS;
+    }
+    transactions = data.transactions || [];
+    setSyncStatus('ok', 'synchronizováno · ' + new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+    renderMemberGrid();
+  } catch(e) {
+    members = DEFAULT_MEMBERS;
+    products = DEFAULT_PRODUCTS;
+    transactions = [];
+    setSyncStatus('error', 'chyba připojení — offline režim');
+    renderMemberGrid();
+  }
+}
+
+async function reloadData() {
+  await loadData();
+  if (historyFilter !== 'all') historyFilter = 'all';
+  renderHistory();
+  renderAdmin();
+  toast('🔄 Data aktualizována');
+}
+
+// ═══════════════════════════════════════════
+//  GOOGLE SHEETS — WRITE
+// ═══════════════════════════════════════════
+async function syncToSheets(action, data) {
+  if (!SCRIPT_URL) return false;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action, ...data}),
+    });
+    setSyncStatus('ok', 'synchronizováno · ' + new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+    return true;
+  } catch(e) {
+    setSyncStatus('error', 'chyba zápisu do Sheets');
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+function showTab(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name==='history') renderHistory();
+  if (name==='admin') renderAdmin();
+}
+
+// ═══════════════════════════════════════════
+//  MEMBERS
+// ═══════════════════════════════════════════
+function filterMembers() {
+  const q = document.getElementById('member-search').value.toLowerCase();
+  renderMemberGrid(members.filter(m =>
+    m.name.toLowerCase().includes(q) ||
+    (m.nick||'').toLowerCase().includes(q) ||
+    (m.family||'').toLowerCase().includes(q)
+  ));
+}
+
+function renderMemberGrid(list) {
+  const grid = document.getElementById('member-grid');
+  if (!list) list = members;
+  if (list.length === 0) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-mono);font-size:12px;color:var(--text3)">žádní členové · přidej v Přehledu</p>';
+    return;
+  }
+  grid.innerHTML = list.map(m => {
+    const c = getColor(m);
+    const isSelected = selectedMember && selectedMember.id === m.id;
+    const isHighDebt = (m.debt||0) >= DEBT_DANGER;
+    const isWarnDebt = (m.debt||0) >= DEBT_WARNING && (m.debt||0) < DEBT_DANGER;
+    const balClass = isHighDebt ? 'bal-danger' : isWarnDebt ? 'bal-warn' : 'bal-ok';
+    const balText = (m.debt||0) > 0 ? `-${m.debt} Kč` : '✓ bez dluhu';
+    return `
+      <div class="member-card${isSelected?' selected':''}" onclick="selectMember('${m.id}')">
+        ${isHighDebt ? '<div class="debt-dot"></div>' : ''}
+        <div class="member-avatar" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${initials(m.name)}</div>
+        <div class="member-name">${m.nick || m.name.split(' ')[0]}</div>
+        <div class="member-family">${m.family||''}</div>
+        <div class="member-bal ${balClass}">${balText}</div>
+      </div>`;
+  }).join('');
+}
+
+function selectMember(id) {
+  selectedMember = members.find(m => m.id === id);
+  cart = [];
+  renderMemberGrid();
+  renderProductPanel();
+  renderCart();
+  showTab('order');
+}
+
+// ═══════════════════════════════════════════
+//  PRODUCTS
+// ═══════════════════════════════════════════
+function renderProductPanel() {
+  if (!selectedMember) return;
+  const c = getColor(selectedMember);
+  document.getElementById('no-member-msg').style.display = 'none';
+  const container = document.getElementById('products-container');
+  container.style.display = 'block';
+  let html = `
+    <div class="selected-member-pill">
+      <div class="smp-av" style="background:${c.bg};color:${c.text}">${initials(selectedMember.name)}</div>
+      <div>
+        <div class="smp-name">${selectedMember.name}</div>
+        <div class="smp-debt">${(selectedMember.debt||0) > 0 ? 'Dluh: '+selectedMember.debt+' Kč' : 'Bez dluhu ✓'}</div>
+      </div>
+    </div>`;
+  Object.entries(products).forEach(([cat, items]) => {
+    html += `<div class="cat-label">${cat}</div><div class="product-grid">`;
+    html += items.map(p => `
+      <button class="prod-btn" onclick="addToCart('${p.name.replace(/'/g,"\\'")}',${p.price},'${p.emoji}')">
+        <div class="prod-emoji">${p.emoji}</div>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-price">${p.price} Kč</div>
+      </button>`).join('');
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+//  CART
+// ═══════════════════════════════════════════
+function addToCart(name, price, emoji) {
+  const ex = cart.find(i => i.name === name);
+  if (ex) ex.qty++;
+  else cart.push({name, price, emoji, qty:1});
+  renderCart();
+}
+
+function removeFromCart(idx) {
+  if (cart[idx].qty > 1) cart[idx].qty--;
+  else cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cart-items');
+  const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  container.innerHTML = cart.length === 0
+    ? '<div class="cart-empty">košík je prázdný</div>'
+    : cart.map((i,idx) => `
+        <div class="cart-item">
+          <span class="ci-name">${i.emoji} ${i.name}${i.qty>1?' ×'+i.qty:''}</span>
+          <span class="ci-price">${i.price*i.qty} Kč</span>
+          <button class="ci-del" onclick="removeFromCart(${idx})">−</button>
+        </div>`).join('');
+  document.getElementById('cart-total').textContent = total + ' Kč';
+  document.getElementById('btn-confirm').disabled = cart.length === 0 || !selectedMember;
+}
+
+async function confirmOrder() {
+  if (!selectedMember || cart.length === 0) return;
+  const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const itemStr = cart.map(i => `${i.emoji} ${i.name}${i.qty>1?' ×'+i.qty:''}`).join(', ');
+  const ts = new Date().toISOString();
+  const tsLocal = new Date().toLocaleString('cs-CZ',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+
+  // Update local state
+  const m = members.find(x => x.id === selectedMember.id);
+  m.debt = (m.debt||0) + total;
+  m.spent = (m.spent||0) + total;
+  transactions.unshift({
+    id: 't'+Date.now(), memberId: selectedMember.id,
+    member: selectedMember.name, items: itemStr, amount: total, ts: tsLocal,
+  });
+
+  // Sync to Sheets
+  setSyncStatus('loading', 'zapisuji…');
+  await syncToSheets('transaction', {
+    memberId: selectedMember.id, memberName: selectedMember.name,
+    items: itemStr, amount: total, timestamp: ts,
+  });
+
+  toast(`✓ ${selectedMember.nick || selectedMember.name} · ${total} Kč zapsáno`);
+  cart = [];
+  selectedMember = null;
+  renderCart();
+  document.getElementById('no-member-msg').style.display = 'flex';
+  document.getElementById('products-container').style.display = 'none';
+  showTab('members');
+  renderMemberGrid();
+}
+
+function clearOrder() {
+  cart = [];
+  selectedMember = null;
+  renderCart();
+  document.getElementById('no-member-msg').style.display = 'flex';
+  document.getElementById('products-container').style.display = 'none';
+  showTab('members');
+  renderMemberGrid();
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════
+function renderHistory() {
+  const names = [...new Set(transactions.map(t => t.member))];
+  document.getElementById('history-filters').innerHTML =
+    `<button class="filter-btn${historyFilter==='all'?' active':''}" onclick="setHistoryFilter('all',this)">Všichni</button>`
+    + names.map(n => `<button class="filter-btn${historyFilter===n?' active':''}" onclick="setHistoryFilter('${n}',this)">${n.split(' ')[0]}</button>`).join('');
+  renderHistoryList();
+}
+
+function setHistoryFilter(f, btn) {
+  historyFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const list = historyFilter === 'all' ? transactions : transactions.filter(t => t.member === historyFilter);
+  document.getElementById('history-list').innerHTML = list.length === 0
+    ? '<p style="color:var(--text3);text-align:center;padding:30px;font-family:var(--font-mono);font-size:12px">žádné záznamy</p>'
+    : list.map(t => {
+        const m = members.find(x => x.id === t.memberId) || {colorIdx:0};
+        const c = getColor(m);
+        return `<div class="history-item">
+          <div class="hi-av" style="background:${c.bg};color:${c.text}">${initials(t.member)}</div>
+          <div class="hi-info">
+            <div class="hi-name">${t.member}</div>
+            <div class="hi-items">${t.items}</div>
+            <div class="hi-time">${t.ts}</div>
+          </div>
+          <div class="hi-amount">−${t.amount} Kč</div>
+        </div>`;
+      }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════════
+function renderAdmin() {
+  const totalDebt  = members.reduce((s,m) => s+(m.debt||0), 0);
+  const totalSpent = members.reduce((s,m) => s+(m.spent||0), 0);
+  const inDebt     = members.filter(m => (m.debt||0) > 0).length;
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-val" style="color:var(--red)">${totalDebt.toLocaleString('cs')} Kč</div><div class="stat-lbl">CELK. DLUHY</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--green)">${totalSpent.toLocaleString('cs')} Kč</div><div class="stat-lbl">ÚTRATA CELKEM</div></div>
+    <div class="stat-box"><div class="stat-val">${inDebt}</div><div class="stat-lbl">ČLENŮ V DLUHU</div></div>`;
+  const withDebt = [...members].filter(m=>(m.debt||0)>0).sort((a,b)=>b.debt-a.debt);
+  document.getElementById('admin-debts').innerHTML = `
+    <div class="admin-section-hd"><div class="dot" style="background:var(--red)"></div>PŘEHLED DLUHŮ</div>
+    ${withDebt.map(m => {
+      const c = getColor(m);
+      const col = (m.debt||0)>=DEBT_DANGER ? 'var(--red)' : 'var(--amber)';
+      return `<div class="debt-row">
+        <div class="debt-row-name">
+          <div class="debt-row-av" style="background:${c.bg};color:${c.text}">${initials(m.name)}</div>
+          ${m.name}${(m.debt||0)>=DEBT_DANGER?' ⚠️':''}
+        </div>
+        <div class="debt-row-amt" style="color:${col}">${(m.debt||0).toLocaleString('cs')} Kč</div>
+      </div>`;
+    }).join('') || '<p style="font-size:12px;color:var(--text3);font-family:var(--font-mono)">žádné dluhy 🎉</p>'}`;
+  const medals = ['🥇','🥈','🥉','4','5'];
+  const lb = [...members].sort((a,b)=>(b.spent||0)-(a.spent||0)).slice(0,5);
+  document.getElementById('admin-leaderboard').innerHTML = `
+    <div class="admin-section-hd"><div class="dot" style="background:var(--amber)"></div>LEADERBOARD — NEJVĚTŠÍ ŽÍZNIVEC MĚSÍCE</div>
+    ${lb.map((m,i) => {
+      const c = getColor(m);
+      return `<div class="lb-row">
+        <div class="lb-rank">${medals[i]}</div>
+        <div class="lb-av" style="background:${c.bg};color:${c.text}">${initials(m.name)}</div>
+        <div class="lb-name">${m.name}</div>
+        <div class="lb-amount">${(m.spent||0).toLocaleString('cs')} Kč</div>
+        ${i===0?'<span>🏆</span>':''}
+      </div>`;
+    }).join('')}`;
+}
+
+// ═══════════════════════════════════════════
+//  MODALS — MEMBER
+// ═══════════════════════════════════════════
+function showAddMember() { openModal('modal-member'); }
+
+async function addMember() {
+  const name   = document.getElementById('new-name').value.trim();
+  const nick   = document.getElementById('new-nick').value.trim();
+  const family = document.getElementById('new-family').value.trim();
+  if (!name) { toast('Zadej jméno', true); return; }
+  const newM = {
+    id: 'm'+Date.now(), name,
+    nick: nick || name.split(' ')[0],
+    family: family || (name.split(' ')[1] || name),
+    debt: 0, spent: 0, colorIdx: members.length % COLORS.length
+  };
+  members.push(newM);
+  await syncToSheets('addMember', newM);
+  renderMemberGrid();
+  closeModal('modal-member');
+  ['new-name','new-nick','new-family'].forEach(id => document.getElementById(id).value='');
+  toast(`✓ ${name} přidán`);
+}
+
+// ═══════════════════════════════════════════
+//  MODALS — TOP UP
+// ═══════════════════════════════════════════
+function showTopUp() {
+  document.getElementById('topup-member').innerHTML = members.map(m =>
+    `<option value="${m.id}">${m.name}${(m.debt||0)>0?' — dluh: '+(m.debt||0)+' Kč':''}</option>`).join('');
+  openModal('modal-topup');
+}
+
+async function topUp() {
+  const memberId = document.getElementById('topup-member').value;
+  const amount   = parseInt(document.getElementById('topup-amount').value);
+  const method   = document.getElementById('topup-method').value;
+  if (!amount || amount <= 0) { toast('Zadej částku', true); return; }
+  const m = members.find(x => x.id === memberId);
+  m.debt = Math.max(0, (m.debt||0) - amount);
+  await syncToSheets('payment', {memberId, memberName: m.name, amount, method, timestamp: new Date().toISOString()});
+  closeModal('modal-topup');
+  document.getElementById('topup-amount').value='';
+  toast(`✓ Platba ${amount} Kč — ${m.name}`);
+  renderMemberGrid();
+  renderAdmin();
+}
+
+// ═══════════════════════════════════════════
+//  MODAL — QR
+// ═══════════════════════════════════════════
+function showQR() {
+  const url = APP_URL;
+  document.getElementById('qr-url').textContent = url;
+  document.getElementById('qr-container').innerHTML =
+    `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&bgcolor=161a17&color=3ddc84&qzone=2" style="border-radius:10px;display:block" alt="QR kód" />`;
+  openModal('modal-qr');
+}
+
+// ═══════════════════════════════════════════
+//  MODAL — PRODUCTS
+// ═══════════════════════════════════════════
+function showProducts() { renderProductsModal(); openModal('modal-products'); }
+
+function renderProductsModal() {
+  const all = Object.entries(products).flatMap(([cat,items]) => items.map(p=>({...p,cat})));
+  document.getElementById('products-list').innerHTML = all.length === 0
+    ? '<p style="font-size:12px;color:var(--text3);font-family:var(--font-mono);padding:10px 0">žádné produkty</p>'
+    : all.map(p => `
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px">
+          <span style="font-size:18px">${p.emoji}</span>
+          <span style="flex:1;color:var(--text)">${p.name} <span style="color:var(--text3);font-size:11px;font-family:var(--font-mono)">${p.cat}</span></span>
+          <span style="font-family:var(--font-mono);color:var(--green);min-width:50px;text-align:right">${p.price} Kč</span>
+          <button style="background:var(--red-dim);border:none;color:var(--red);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11px" onclick="deleteProduct('${p.name.replace(/'/g,"\\'")}','${p.cat}')">✕</button>
+        </div>`).join('');
+}
+
+async function addProduct() {
+  const name  = document.getElementById('np-name').value.trim();
+  const cat   = document.getElementById('np-cat').value.trim() || 'Ostatní';
+  const price = parseInt(document.getElementById('np-price').value);
+  const emoji = document.getElementById('np-emoji').value.trim() || '•';
+  if (!name || !price) { toast('Vyplň název a cenu', true); return; }
+  if (!products[cat]) products[cat] = [];
+  products[cat].push({name, price, emoji});
+  await syncToSheets('addProduct', {name, cat, price, emoji});
+  ['np-name','np-price','np-emoji'].forEach(id => document.getElementById(id).value='');
+  renderProductsModal();
+  toast(`✓ ${name} přidán`);
+}
+
+async function deleteProduct(name, cat) {
+  if (!products[cat]) return;
+  products[cat] = products[cat].filter(p => p.name !== name);
+  if (products[cat].length === 0) delete products[cat];
+  await syncToSheets('deleteProduct', {name, cat});
+  renderProductsModal();
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT CSV
+// ═══════════════════════════════════════════
+function exportCSV() {
+  const bom = '\uFEFF';
+  const mRows = [['ID','Jméno','Přezdívka','Rodina','Dluh (Kč)','Útrata celkem (Kč)']];
+  members.forEach(m => mRows.push([m.id, m.name, m.nick||'', m.family||'', m.debt||0, m.spent||0]));
+  const tRows = [['ID','Člen','Položky','Částka (Kč)','Čas']];
+  transactions.forEach(t => tRows.push([t.id, t.member, t.items, t.amount, t.ts]));
+  const csv = bom + '=== PŘEHLED ČLENŮ ===\n' + mRows.map(r=>r.join(';')).join('\n')
+            + '\n\n=== TRANSAKCE ===\n' + tRows.map(r=>r.join(';')).join('\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})),
+    download: `padel-klatovy-export-${new Date().toISOString().slice(0,10)}.csv`
+  });
+  a.click();
+  toast('📥 CSV exportováno');
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function toast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError?' error':'');
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function updateClock() {
+  const el = document.getElementById('clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+}
+
+document.querySelectorAll('.modal-overlay').forEach(el =>
+  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('show'); }));
+
+setInterval(updateClock, 15000);
+updateClock();
+
+// Auto-refresh každých 60 sekund pokud je Sheets připojeno
+setInterval(() => { if (SCRIPT_URL) loadData(); }, 60000);
+
+initApp();
+</script>
+</body>
+</html>

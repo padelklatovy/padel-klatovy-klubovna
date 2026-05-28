@@ -1,0 +1,17 @@
+{
+  "name": "PADEL KLATOVY Bar",
+  "short_name": "PK Bar",
+  "description": "Padel Klatovy — klubový bar systém",
+  "start_url": "/padel-klatovy-bar/",
+  "display": "standalone",
+  "background_color": "#0e1210",
+  "theme_color": "#0e1210",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=PK",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
