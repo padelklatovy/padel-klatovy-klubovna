@@ -390,7 +390,7 @@ function initials(name) { return name.split(' ').map(w=>w[0]).join('').slice(0,2
 // ═══════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════
-let SCRIPT_URL = localStorage.getItem('pk_script_url') || '';
+let SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytQnbqHN5qwYd3LwH_zmxyi6m0udJMOptaZx0OgGiBEnmv2vLsMoro-jKr8K2pbTxx/exec';
 let members = [];
 let products = {};
 let transactions = [];
@@ -435,6 +435,11 @@ const DEFAULT_PRODUCTS = {
 //  SETUP
 // ═══════════════════════════════════════════
 function initApp() {
+  localStorage.setItem('pk_script_url', SCRIPT_URL);
+  localStorage.setItem('pk_skip_setup', '1');
+  // URL je zapečená přímo v kódu
+  localStorage.setItem('pk_script_url', SCRIPT_URL);
+  localStorage.setItem('pk_skip_setup', '1');
   const hasUrl = localStorage.getItem('pk_script_url');
   const skipSetup = localStorage.getItem('pk_skip_setup');
   if (hasUrl || skipSetup) {
