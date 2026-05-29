@@ -515,8 +515,6 @@ async function sync(action,data){
         resolve();
       };
       img.src=url;
-      // Also try fetch as backup
-      fetch(url,{mode:'no-cors'}).catch(function(){});
     }catch(e){
       setSyncStatus('err','chyba zapisu');
       resolve();
