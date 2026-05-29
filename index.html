@@ -562,6 +562,8 @@ function pinDel(){pinEntry=pinEntry.slice(0,-1);updatePinDots();}
 function loginMember(m){
   selectedMember=m;
   cart=[];
+  // Hide pin overlay first
+  document.getElementById('pin-overlay').classList.remove('show');
   // Show banner
   const c=gc(m);
   document.getElementById('mb-av').style.cssText=`background:${c.bg};color:${c.text};border:1px solid ${c.border};`;
@@ -571,7 +573,8 @@ function loginMember(m){
   document.getElementById('member-banner').classList.add('show');
   renderProducts();
   renderCart();
-  showTab('order');
+  // Small delay to ensure overlay is gone before switching
+  setTimeout(()=>showTab('order'), 50);
 }
 
 function logout(){
