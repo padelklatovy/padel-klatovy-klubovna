@@ -290,6 +290,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
           <button class="act-btn" onclick="showQR()">📲 QR kód</button>
           <button class="act-btn" onclick="showProducts()">🧾 Produkty</button>
           <button class="act-btn" onclick="exportCSV()">📥 Export CSV</button>
+          <button class="act-btn" onclick="backupData()">💾 Záloha dat</button>
           <button class="act-btn" onclick="reloadData()">🔄 Sync</button>
         </div>
       </div>
@@ -996,6 +997,26 @@ async function deleteProduct(name,cat){
 }
 
 // ── EXPORT ──
+function backupData(){
+  const now=new Date();
+  const bom='\uFEFF';
+  const pad=n=>String(n).padStart(2,'0');
+  const dateStr=pad(now.getDate())+'.'+pad(now.getMonth()+1)+'.'+now.getFullYear()+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+  const mR=[['ID','Jmeno','Prezdivka','Rodina','Dluh','Utrata','colorIdx']];
+  members.forEach(function(m){mR.push([m.id,m.name,m.nick||'',m.family||'',m.debt||0,m.spent||0,m.colorIdx||0]);});
+  const tR=[['ID','Clen','ClenID','Polozky','Castka','Poznamka','Cas']];
+  transactions.forEach(function(t){tR.push([t.id,t.member,t.memberId,t.items,t.amount,t.note||'',t.ts]);});
+  const pR=[['Kategorie','Nazev','Cena','Emoji']];
+  Object.entries(products).forEach(function(e){var cat=e[0];e[1].forEach(function(p){pR.push([cat,p.name,p.price,p.emoji]);});});
+  var csv=bom+'ZALOHA PADEL KLATOVY BAR\nDatum: '+dateStr+'\n\n=== CLENOVE ===\n'+mR.map(function(r){return r.join(';');}).join('\n')+'\n\n=== TRANSAKCE ===\n'+tR.map(function(r){return r.join(';');}).join('\n')+'\n\n=== PRODUKTY ===\n'+pR.map(function(r){return r.join(';');}).join('\n');
+  var filename='padel-zaloha-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'.csv';
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=filename;
+  a.click();
+  toast('Zaloha stazena');
+}
+
 function exportCSV(){
   const bom='\uFEFF';
   const mR=[['Jméno','Dluh','Útrata']];members.forEach(m=>mR.push([m.name,m.debt||0,m.spent||0]));
