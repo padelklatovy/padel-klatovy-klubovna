@@ -543,7 +543,7 @@ async function pinPress(d){
   pinEntry+=d;
   updatePinDots();
   if(pinEntry.length===4){
-    setTimeout(()=>{
+    setTimeout(async ()=>{
       if(pinMode==='verify'){
         const hash=await hashPin(pinEntry);
         if(hash===String(pinsCache[pinTarget.id])){
