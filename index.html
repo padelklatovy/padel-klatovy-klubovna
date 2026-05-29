@@ -951,12 +951,22 @@ function editMember(i){
 
 async function deleteMember(id){
   const m=members.find(x=>x.id===id);
-  if(!m||!confirm(`Smazat ${m.name}?`))return;
+  if(!m||!confirm('Smazat '+m.name+'?'))return;
   members=members.filter(x=>x.id!==id);
   delete pinsCache[id];
+  // Odhlás pokud je právě přihlášen
+  if(selectedMember&&selectedMember.id===id){
+    localStorage.removeItem('pk_logged_in');
+    selectedMember=null;
+    document.getElementById('member-banner').classList.remove('show');
+  }
+  // Vymaž z localStorage pokud tam byl uložen
+  if(localStorage.getItem('pk_logged_in')===id){
+    localStorage.removeItem('pk_logged_in');
+  }
   await sync('deletePin',{memberId:id});
   await sync('deleteMember',{id});
-  showManageMembers();renderMembers();renderAdmin();toast(`🗑️ ${m.name} smazán`);
+  showManageMembers();renderMembers();renderAdmin();toast(m.name+' smazan');
 }
 
 // ── TOP UP ──
