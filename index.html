@@ -692,6 +692,11 @@ function renderMembers(list){
 async function handleMemberClick(id){
   const m=members.find(x=>x.id===id);
   if(!m) return;
+  // Admin bypasses PIN
+  if(isAdmin){
+    loginMember(m);
+    return;
+  }
   // Always reload fresh pins from Sheets
   await loadPins();
   if(memberHasPin(m.id)){
