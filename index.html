@@ -692,9 +692,19 @@ function renderMembers(list){
 async function handleMemberClick(id){
   const m=members.find(x=>x.id===id);
   if(!m) return;
-  // Admin bypasses PIN
+  // Admin bypasses PIN - select member and go to order
   if(isAdmin){
-    loginMember(m);
+    selectedMember=m;
+    cart=[];
+    const c=gc(m);
+    document.getElementById('mb-av').style.cssText='background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+';';
+    document.getElementById('mb-av').textContent=ini(m.name);
+    document.getElementById('mb-name').textContent=m.name;
+    document.getElementById('mb-debt').textContent=(m.debt||0)>0?'Dluh: '+(m.debt||0)+' Kc':'Bez dluhu';
+    document.getElementById('member-banner').classList.add('show');
+    renderProducts();
+    renderCart();
+    showTab('order');
     return;
   }
   // Always reload fresh pins from Sheets
@@ -845,9 +855,14 @@ async function deleteTx(id){
   if(m){m.debt=Math.max(0,(m.debt||0)-t.amount);m.spent=Math.max(0,(m.spent||0)-t.amount);}
   transactions=transactions.filter(x=>x.id!==id);
   await sync('deleteTransaction',{transactionId:id,memberName:t.member,items:t.items,amount:t.amount,originalTs:t.ts,deletedAt:new Date().toISOString(),deletedAtLocal:new Date().toLocaleString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})});
-  renderHistoryList();renderMembers();
-  if(selectedMember) document.getElementById('mb-debt').textContent=(members.find(x=>x.id===selectedMember.id)?.debt||0)>0?'Dluh: '+members.find(x=>x.id===selectedMember.id).debt+' Kč':'Bez dluhu ✓';
-  toast('🗑️ Smazáno');
+  renderHistoryList();renderMembers();renderAdmin();
+  if(selectedMember){
+    const sm=members.find(x=>x.id===selectedMember.id);
+    if(sm) document.getElementById('mb-debt').textContent=(sm.debt||0)>0?'Dluh: '+sm.debt+' Kc':'Bez dluhu';
+  }
+  toast('Smazano');
+  // Reload from Sheets to confirm
+  setTimeout(()=>loadData(),2000);
 }
 
 // ── ADMIN ──
