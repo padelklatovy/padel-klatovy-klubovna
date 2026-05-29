@@ -492,8 +492,8 @@ async function loadData(){
     if(data.members&&data.members.length>0)members=data.members;
     products=(data.products&&Object.keys(data.products).length>0)?data.products:DEFAULT_PRODUCTS;
     transactions=data.transactions||[];
+    if(data.pins) pinsCache=data.pins;
     setSyncStatus('ok','synchronizováno · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
-    await loadPins();
   }catch(e){
     products=DEFAULT_PRODUCTS;
     setSyncStatus('err','offline');
@@ -680,12 +680,13 @@ function renderMembers(list){
 async function handleMemberClick(id){
   const m=members.find(x=>x.id===id);
   if(!m) return;
-  // Refresh pins from Sheets before checking
-  await loadPins();
+  // If cache seems empty, reload from Sheets
+  if(Object.keys(pinsCache).length===0){
+    await loadPins();
+  }
   if(memberHasPin(m.id)){
     openPinOverlay(m,'verify');
   } else {
-    // První přihlášení — nastav PIN
     openPinOverlay(m,'setup');
   }
 }
