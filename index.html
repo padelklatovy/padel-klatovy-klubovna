@@ -505,12 +505,23 @@ async function loadData(){
 async function reloadData(){await loadData();renderHistory();renderAdmin();toast('🔄 Aktualizováno');}
 
 async function sync(action,data){
-  try{
-    const payload=encodeURIComponent(JSON.stringify(Object.assign({action:action},data)));
-    const url=SCRIPT_URL+'?payload='+payload;
-    await fetch(url,{method:'GET',mode:'no-cors'});
-    setSyncStatus('ok','synchronizovano · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
-  }catch(e){setSyncStatus('err','chyba zapisu');}
+  return new Promise(function(resolve){
+    try{
+      const payload=encodeURIComponent(JSON.stringify(Object.assign({action:action},data)));
+      const url=SCRIPT_URL+'?payload='+payload;
+      const img=new Image();
+      img.onload=img.onerror=function(){
+        setSyncStatus('ok','synchronizovano · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+        resolve();
+      };
+      img.src=url;
+      // Also try fetch as backup
+      fetch(url,{mode:'no-cors'}).catch(function(){});
+    }catch(e){
+      setSyncStatus('err','chyba zapisu');
+      resolve();
+    }
+  });
 }
 
 function handleAdminClick(){
