@@ -619,6 +619,8 @@ function pinDel(){pinEntry=pinEntry.slice(0,-1);updatePinDots();}
 function loginMember(m){
   selectedMember=m;
   cart=[];
+  // Save to localStorage
+  localStorage.setItem('pk_logged_in', m.id);
   // Force hide pin overlay
   const overlay=document.getElementById('pin-overlay');
   overlay.classList.remove('show');
@@ -638,6 +640,7 @@ function loginMember(m){
 
 function logout(){
   selectedMember=null; cart=[]; isAdmin=false;
+  localStorage.removeItem('pk_logged_in');
   document.getElementById('member-banner').classList.remove('show');
   const adminBtn=document.getElementById('admin-btn');
   adminBtn.textContent='ADMIN';
@@ -659,6 +662,14 @@ function filterMembers(){
 }
 
 function renderMembers(list){
+  // Auto-login if previously logged in
+  if(!selectedMember && !list){
+    const savedId=localStorage.getItem('pk_logged_in');
+    if(savedId){
+      const saved=members.find(m=>m.id===savedId);
+      if(saved){ loginMember(saved); return; }
+    }
+  }
   const g=document.getElementById('member-grid');
   if(!list)list=members;
   if(!list.length){g.innerHTML='<p style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--mono);font-size:12px;color:var(--text3)">žádní členové · přidej v Správě</p>';return;}
@@ -680,10 +691,8 @@ function renderMembers(list){
 async function handleMemberClick(id){
   const m=members.find(x=>x.id===id);
   if(!m) return;
-  // If cache seems empty, reload from Sheets
-  if(Object.keys(pinsCache).length===0){
-    await loadPins();
-  }
+  // Always reload fresh pins from Sheets
+  await loadPins();
   if(memberHasPin(m.id)){
     openPinOverlay(m,'verify');
   } else {
