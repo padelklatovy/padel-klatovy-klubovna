@@ -449,9 +449,31 @@ let pinTarget=null,pinEntry='',pinMode='verify'; // pinMode: verify | setup
 
 function gc(m){return COLORS[(m.colorIdx||0)%COLORS.length];}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
-function getPins(){try{return JSON.parse(localStorage.getItem('pk_pins')||'{}');}catch{return {};}}
-function savePins(p){localStorage.setItem('pk_pins',JSON.stringify(p));}
-function memberHasPin(id){return !!getPins()[id];}
+// PINy jsou ulozeny v Google Sheets jako SHA-256 hash
+let pinsCache={};
+function memberHasPin(id){return !!pinsCache[id];}
+function getPins(){return pinsCache;}
+
+async function hashPin(pin){
+  const msgBuffer=new TextEncoder().encode('PADELKLATOVY:'+pin);
+  const hashBuffer=await crypto.subtle.digest('SHA-256',msgBuffer);
+  const hashArray=Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function loadPins(){
+  try{
+    const res=await fetch(SCRIPT_URL+'?action=getPins&t='+Date.now());
+    const data=await res.json();
+    pinsCache=data.pins||{};
+  }catch(e){}
+}
+
+async function savePin(memberId, pin){
+  const hash=await hashPin(pin);
+  pinsCache[memberId]=hash;
+  await sync('setPin',{memberId, pin:hash});
+}
 
 function setSyncStatus(s,msg){
   document.getElementById('sync-dot').className='sync-dot '+s;
@@ -467,6 +489,7 @@ async function loadData(){
     products=(data.products&&Object.keys(data.products).length>0)?data.products:DEFAULT_PRODUCTS;
     transactions=data.transactions||[];
     setSyncStatus('ok','synchronizováno · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+    await loadPins();
   }catch(e){
     products=DEFAULT_PRODUCTS;
     setSyncStatus('err','offline');
@@ -515,15 +538,15 @@ function updatePinDots(){
 
 let pinSetupFirst='';
 
-function pinPress(d){
+async function pinPress(d){
   if(pinEntry.length>=4) return;
   pinEntry+=d;
   updatePinDots();
   if(pinEntry.length===4){
     setTimeout(()=>{
       if(pinMode==='verify'){
-        const pins=getPins();
-        if(pinEntry===String(pins[pinTarget.id])){
+        const hash=await hashPin(pinEntry);
+        if(hash===String(pinsCache[pinTarget.id])){
           loginMember(pinTarget);
         } else {
           document.getElementById('pin-error').textContent='Špatný PIN';
@@ -538,10 +561,7 @@ function pinPress(d){
         updatePinDots();
       } else if(pinMode==='setup2'){
         if(pinEntry===pinSetupFirst){
-          const pins=getPins();
-          pins[pinTarget.id]=pinEntry;
-          savePins(pins);
-          closePinOverlay();
+          await savePin(pinTarget.id, pinEntry);
           loginMember(pinTarget);
           toast('✓ PIN nastaven');
         } else {
@@ -818,13 +838,12 @@ async function addMember(){
 }
 
 function showManageMembers(){
-  const pins=getPins();
   document.getElementById('manage-list').innerHTML=members.map((m,i)=>{const c=gc(m);
     return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
       <div style="width:36px;height:36px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${ini(m.name)}</div>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:600">${m.name}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${m.family||''} · dluh: ${m.debt||0} Kč · ${pins[m.id]?'🔒 PIN nastaven':'bez PINu'}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${m.family||''} · dluh: ${m.debt||0} Kč · ${pinsCache[m.id]?'🔒 PIN nastaven':'bez PINu'}</div>
       </div>
       <button onclick="resetMemberPin('${m.id}')" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:11px;margin-right:4px" title="Reset PIN">🔑</button>
       <button onclick="editMember(${i})" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:12px;margin-right:4px">✏️</button>
@@ -834,12 +853,11 @@ function showManageMembers(){
   openModal('modal-manage');
 }
 
-function resetMemberPin(id){
+async function resetMemberPin(id){
   const m=members.find(x=>x.id===id);
   if(!m||!confirm(`Reset PIN pro ${m.name}?\nČlen si nastaví nový při příštím přihlášení.`))return;
-  const pins=getPins();
-  delete pins[id];
-  savePins(pins);
+  delete pinsCache[id];
+  await sync('deletePin',{memberId:id});
   showManageMembers();
   toast(`🔑 PIN pro ${m.name} resetován`);
 }
@@ -858,7 +876,8 @@ async function deleteMember(id){
   const m=members.find(x=>x.id===id);
   if(!m||!confirm(`Smazat ${m.name}?`))return;
   members=members.filter(x=>x.id!==id);
-  const pins=getPins();delete pins[id];savePins(pins);
+  delete pinsCache[id];
+  await sync('deletePin',{memberId:id});
   await sync('deleteMember',{id});
   showManageMembers();renderMembers();renderAdmin();toast(`🗑️ ${m.name} smazán`);
 }
