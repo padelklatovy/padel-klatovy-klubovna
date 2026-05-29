@@ -506,9 +506,12 @@ async function reloadData(){await loadData();renderHistory();renderAdmin();toast
 
 async function sync(action,data){
   try{
-    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...data})});
-    setSyncStatus('ok','synchronizováno · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
-  }catch(e){setSyncStatus('err','chyba zápisu');}
+    const payload=Object.assign({action:action},data);
+    const form=new FormData();
+    form.append('payload',JSON.stringify(payload));
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:form});
+    setSyncStatus('ok','synchronizovano · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){setSyncStatus('err','chyba zapisu');}
 }
 
 function handleAdminClick(){
