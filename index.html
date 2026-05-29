@@ -21,6 +21,8 @@
 }
 html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:100%;overflow:hidden;}
 .app{display:flex;flex-direction:column;height:100vh;max-width:1024px;margin:0 auto;}
+
+/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .logo{display:flex;align-items:center;gap:10px;}
 .logo-text{font-weight:800;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;}
@@ -29,17 +31,49 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .clock{font-family:var(--mono);font-size:13px;color:var(--text2);}
 .btn-sm{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);padding:7px 12px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;}
 .btn-sm:hover{border-color:var(--green);color:var(--green);}
+
+/* SYNC */
 .sync-bar{background:var(--bg3);border-bottom:0.5px solid var(--border);padding:4px 20px;font-family:var(--mono);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
 .sync-dot.ok{background:var(--green);}
 .sync-dot.err{background:var(--red);}
 .sync-dot.loading{background:var(--amber);animation:pulse 1s infinite;}
+
+/* TABS */
 .tabs{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .tab{flex:1;padding:10px 4px;text-align:center;font-size:10px;font-family:var(--mono);letter-spacing:0.3px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;}
 .tab span{display:block;font-size:17px;margin-bottom:2px;}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* SCREENS */
 .screen{display:none;flex:1;overflow:hidden;flex-direction:column;}
 .screen.active{display:flex;}
+
+/* PIN OVERLAY */
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.pin-overlay.show{display:flex;}
+.pin-member-name{font-family:var(--font);font-weight:800;font-size:20px;letter-spacing:1px;color:var(--text);}
+.pin-member-sub{font-family:var(--mono);font-size:12px;color:var(--text3);}
+.pin-dots{display:flex;gap:14px;margin:6px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--text3);transition:all 0.15s;}
+.pin-dot.filled{background:var(--green);border-color:var(--green);}
+.pin-error{font-family:var(--mono);font-size:12px;color:var(--red);height:16px;text-align:center;}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px;}
+.pin-btn{background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);padding:18px;font-family:var(--font);font-weight:700;font-size:22px;color:var(--text);cursor:pointer;text-align:center;transition:all 0.12s;user-select:none;}
+.pin-btn:active{transform:scale(0.93);background:var(--green-dark);border-color:var(--green);}
+.pin-btn.del{font-size:16px;color:var(--text2);}
+.pin-cancel{font-family:var(--mono);font-size:12px;color:var(--text3);cursor:pointer;margin-top:4px;padding:8px 20px;}
+.pin-cancel:hover{color:var(--text2);}
+
+/* MEMBER BANNER */
+.member-banner{display:none;align-items:center;gap:12px;background:var(--green-dark);border-bottom:0.5px solid var(--green-dim);padding:10px 20px;flex-shrink:0;}
+.member-banner.show{display:flex;}
+.mb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;}
+.mb-name{font-size:14px;font-weight:700;color:var(--green);flex:1;}
+.mb-debt{font-family:var(--mono);font-size:12px;color:var(--text2);}
+.mb-logout{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;padding:6px 10px;border:0.5px solid var(--border);border-radius:6px;}
+.mb-logout:hover{color:var(--red);border-color:var(--red);}
+
 /* MEMBERS */
 .search-bar{padding:12px 16px;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .search-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;}
@@ -57,10 +91,31 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .bal-ok{color:var(--green);}.bal-warn{color:var(--amber);}.bal-danger{color:var(--red);}
 .debt-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+
 /* ORDER */
-.order-layout{display:flex;flex:1;overflow:hidden;}
+.order-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
 .product-panel{flex:1;overflow-y:auto;padding:14px;border-right:0.5px solid var(--border);}
-.order-sidebar{width:220px;display:flex;flex-direction:column;padding:14px;background:var(--bg2);flex-shrink:0;}
+.order-sidebar{width:220px;display:flex;flex-direction:column;padding:14px;background:var(--bg2);flex-shrink:0;min-height:0;}
+.cart-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;flex-shrink:0;}
+.cart-items{flex:1;overflow-y:auto;min-height:0;}
+.cart-empty{font-size:12px;color:var(--text3);text-align:center;padding:20px 0;font-family:var(--mono);}
+.cart-item{display:flex;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px;gap:6px;}
+.ci-name{flex:1;color:var(--text);}
+.ci-price{font-family:var(--mono);color:var(--green);font-size:12px;min-width:38px;text-align:right;}
+.ci-del{color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;background:none;border:none;}
+.ci-del:hover{color:var(--red);}
+.cart-bottom{flex-shrink:0;}
+.cart-note{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:12px;resize:none;margin:8px 0;}
+.cart-note:focus{outline:none;border-color:var(--green);}
+.cart-note::placeholder{color:var(--text3);}
+.cart-total{display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border2);padding-top:8px;margin-top:4px;}
+.ct-label{font-size:12px;color:var(--text2);font-family:var(--mono);}
+.ct-amount{font-size:22px;font-weight:800;}
+.btn-confirm{margin-top:8px;width:100%;background:var(--green);color:#0a1a10;border:none;border-radius:var(--rs);padding:13px;font-family:var(--font);font-weight:800;font-size:14px;cursor:pointer;}
+.btn-confirm:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+.btn-repeat{margin-top:6px;width:100%;background:transparent;border:0.5px solid var(--green-dim);border-radius:var(--rs);padding:8px;font-size:12px;color:var(--green);cursor:pointer;font-family:var(--mono);display:none;}
+.btn-clear{margin-top:6px;width:100%;background:transparent;border:0.5px solid var(--border);border-radius:var(--rs);padding:8px;font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--mono);}
+.no-member{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--text3);gap:10px;font-family:var(--mono);font-size:13px;}
 .sel-pill{display:flex;align-items:center;gap:10px;background:var(--green-dark);border:0.5px solid var(--green-dim);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;}
 .sel-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;}
 .sel-name{font-size:13px;font-weight:600;color:var(--green);}
@@ -73,25 +128,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .prod-emoji{font-size:20px;}
 .prod-name{font-size:13px;font-weight:600;margin-top:2px;}
 .prod-price{font-family:var(--mono);font-size:12px;color:var(--green);}
-.cart-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;flex-shrink:0;}
-.cart-items{flex:1;overflow-y:auto;}
-.cart-empty{font-size:12px;color:var(--text3);text-align:center;padding:20px 0;font-family:var(--mono);}
-.cart-item{display:flex;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px;gap:6px;}
-.ci-name{flex:1;color:var(--text);}
-.ci-price{font-family:var(--mono);color:var(--green);font-size:12px;min-width:38px;text-align:right;}
-.ci-del{color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;background:none;border:none;}
-.ci-del:hover{color:var(--red);}
-.cart-note{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:12px;resize:none;margin:8px 0;flex-shrink:0;}
-.cart-note:focus{outline:none;border-color:var(--green);}
-.cart-note::placeholder{color:var(--text3);}
-.cart-total{display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border2);padding-top:8px;margin-top:4px;flex-shrink:0;}
-.ct-label{font-size:12px;color:var(--text2);font-family:var(--mono);}
-.ct-amount{font-size:22px;font-weight:800;}
-.btn-confirm{margin-top:8px;width:100%;background:var(--green);color:#0a1a10;border:none;border-radius:var(--rs);padding:13px;font-family:var(--font);font-weight:800;font-size:14px;cursor:pointer;flex-shrink:0;}
-.btn-confirm:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
-.btn-repeat{margin-top:6px;width:100%;background:transparent;border:0.5px solid var(--green-dim);border-radius:var(--rs);padding:8px;font-size:12px;color:var(--green);cursor:pointer;font-family:var(--mono);flex-shrink:0;display:none;}
-.btn-clear{margin-top:6px;width:100%;background:transparent;border:0.5px solid var(--border);border-radius:var(--rs);padding:8px;font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--mono);flex-shrink:0;}
-.no-member{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--text3);gap:10px;font-family:var(--mono);font-size:13px;}
+
 /* HISTORY */
 .history-filters{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:0.5px solid var(--border);background:var(--bg2);flex-shrink:0;}
 .filter-btn{background:var(--bg3);border:0.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;}
@@ -105,6 +142,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .hi-note{font-size:11px;color:var(--amber);margin-top:2px;font-style:italic;}
 .hi-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;}
 .hi-amt{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--red);flex-shrink:0;}
+
 /* ADMIN */
 .admin-scroll{flex:1;overflow-y:auto;padding:14px;}
 .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
@@ -121,6 +159,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .actions{display:flex;gap:8px;flex-wrap:wrap;}
 .act-btn{display:flex;align-items:center;gap:7px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--rs);padding:10px 14px;font-size:12px;font-family:var(--mono);color:var(--text);cursor:pointer;}
 .act-btn:hover{border-color:var(--green);color:var(--green);}
+
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s;padding:20px;}
 .modal-overlay.show{opacity:1;pointer-events:all;}
@@ -133,8 +172,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 .modal-actions{display:flex;gap:10px;margin-top:16px;}
 .btn-primary{flex:1;background:var(--green);color:#0a1a10;border:none;border-radius:var(--rs);padding:12px;font-family:var(--font);font-weight:800;font-size:14px;cursor:pointer;}
 .btn-cancel{flex:1;background:transparent;color:var(--text2);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px;font-size:14px;cursor:pointer;font-family:var(--mono);}
+
 /* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0a1a10;padding:12px 22px;border-radius:30px;font-weight:800;font-size:13px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:300;white-space:nowrap;pointer-events:none;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0a1a10;padding:12px 22px;border-radius:30px;font-weight:800;font-size:13px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:400;white-space:nowrap;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 .toast.error{background:var(--red);color:#fff;}
 ::-webkit-scrollbar{width:4px;}
@@ -142,6 +182,36 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
 </style>
 </head>
 <body>
+
+<!-- PIN OVERLAY -->
+<div class="pin-overlay" id="pin-overlay">
+  <div id="pin-av-wrap"></div>
+  <div class="pin-member-name" id="pin-member-name"></div>
+  <div class="pin-member-sub" id="pin-member-sub">Zadej PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-grid">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <button class="pin-btn" onclick="pinPress('0')" style="grid-column:2">0</button>
+    <button class="pin-btn del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-cancel" onclick="closePinOverlay()">Zrušit</div>
+</div>
+
+<!-- APP -->
 <div class="app">
   <div class="topbar">
     <div class="logo">
@@ -153,7 +223,19 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
       <button class="btn-sm" onclick="showTab('admin')">ADMIN</button>
     </div>
   </div>
+
   <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">načítám…</span></div>
+
+  <!-- MEMBER BANNER (zobrazí se po přihlášení) -->
+  <div class="member-banner" id="member-banner">
+    <div class="mb-av" id="mb-av"></div>
+    <div>
+      <div class="mb-name" id="mb-name"></div>
+      <div class="mb-debt" id="mb-debt"></div>
+    </div>
+    <button class="mb-logout" onclick="logout()">Odhlásit</button>
+  </div>
+
   <div class="tabs">
     <div class="tab active" id="tab-members" onclick="showTab('members')"><span>👥</span>členové</div>
     <div class="tab" id="tab-order" onclick="showTab('order')"><span>🛒</span>objednávka</div>
@@ -175,11 +257,16 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
       <div class="order-sidebar">
         <div class="cart-label">KOŠÍK</div>
         <div class="cart-items" id="cart-items"></div>
-        <textarea class="cart-note" id="cart-note" rows="2" placeholder="Poznámka…"></textarea>
-        <div class="cart-total"><span class="ct-label">CELKEM</span><span class="ct-amount" id="cart-total">0 Kč</span></div>
-        <button class="btn-confirm" id="btn-confirm" onclick="confirmOrder()" disabled>✓ ZAPSAT NA ÚČET</button>
-        <button class="btn-repeat" id="btn-repeat" onclick="repeatLast()">↩ Opakovat poslední</button>
-        <button class="btn-clear" onclick="clearOrder()">zrušit</button>
+        <div class="cart-bottom">
+          <textarea class="cart-note" id="cart-note" rows="2" placeholder="Poznámka…"></textarea>
+          <div class="cart-total">
+            <span class="ct-label">CELKEM</span>
+            <span class="ct-amount" id="cart-total">0 Kč</span>
+          </div>
+          <button class="btn-confirm" id="btn-confirm" onclick="confirmOrder()" disabled>✓ ZAPSAT NA ÚČET</button>
+          <button class="btn-repeat" id="btn-repeat" onclick="repeatLast()">↩ Opakovat poslední</button>
+          <button class="btn-clear" onclick="clearOrder()">zrušit</button>
+        </div>
       </div>
     </div>
   </div>
@@ -210,6 +297,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
   </div>
 </div>
 
+<!-- MODALS -->
 <div class="modal-overlay" id="modal-member">
   <div class="modal">
     <div class="modal-title">Nový člen</div>
@@ -357,9 +445,13 @@ const DEFAULT_PRODUCTS={
 };
 
 let members=[],products={},transactions=[],selectedMember=null,cart=[],historyFilter='all';
+let pinTarget=null,pinEntry='',pinMode='verify'; // pinMode: verify | setup
 
 function gc(m){return COLORS[(m.colorIdx||0)%COLORS.length];}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function getPins(){try{return JSON.parse(localStorage.getItem('pk_pins')||'{}');}catch{return {};}}
+function savePins(p){localStorage.setItem('pk_pins',JSON.stringify(p));}
+function memberHasPin(id){return !!getPins()[id];}
 
 function setSyncStatus(s,msg){
   document.getElementById('sync-dot').className='sync-dot '+s;
@@ -400,6 +492,100 @@ function showTab(n){
   if(n==='admin')renderAdmin();
 }
 
+// ── PIN ──
+function openPinOverlay(member, mode){
+  pinTarget=member; pinEntry=''; pinMode=mode;
+  const c=gc(member);
+  document.getElementById('pin-av-wrap').innerHTML=`<div style="width:60px;height:60px;border-radius:50%;background:${c.bg};color:${c.text};border:2px solid ${c.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px">${ini(member.name)}</div>`;
+  document.getElementById('pin-member-name').textContent=member.nick||member.name.split(' ')[0];
+  document.getElementById('pin-member-sub').textContent=mode==='setup'?'Nastav si 4místný PIN':mode==='setup2'?'Zadej PIN znovu pro potvrzení':'Zadej PIN';
+  document.getElementById('pin-error').textContent='';
+  updatePinDots();
+  document.getElementById('pin-overlay').classList.add('show');
+}
+
+function closePinOverlay(){
+  document.getElementById('pin-overlay').classList.remove('show');
+  pinTarget=null; pinEntry=''; pinMode='verify';
+}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<pinEntry.length);
+}
+
+let pinSetupFirst='';
+
+function pinPress(d){
+  if(pinEntry.length>=4) return;
+  pinEntry+=d;
+  updatePinDots();
+  if(pinEntry.length===4){
+    setTimeout(()=>{
+      if(pinMode==='verify'){
+        const pins=getPins();
+        if(pinEntry===pins[pinTarget.id]){
+          closePinOverlay();
+          loginMember(pinTarget);
+        } else {
+          document.getElementById('pin-error').textContent='Špatný PIN';
+          pinEntry='';updatePinDots();
+        }
+      } else if(pinMode==='setup'){
+        pinSetupFirst=pinEntry;
+        pinEntry='';
+        pinMode='setup2';
+        document.getElementById('pin-member-sub').textContent='Zadej PIN znovu pro potvrzení';
+        document.getElementById('pin-error').textContent='';
+        updatePinDots();
+      } else if(pinMode==='setup2'){
+        if(pinEntry===pinSetupFirst){
+          const pins=getPins();
+          pins[pinTarget.id]=pinEntry;
+          savePins(pins);
+          closePinOverlay();
+          loginMember(pinTarget);
+          toast('✓ PIN nastaven');
+        } else {
+          document.getElementById('pin-error').textContent='PINy se neshodují — zkus znovu';
+          pinEntry=''; pinSetupFirst=''; pinMode='setup';
+          document.getElementById('pin-member-sub').textContent='Nastav si 4místný PIN';
+          updatePinDots();
+        }
+      }
+    },200);
+  }
+}
+
+function pinDel(){pinEntry=pinEntry.slice(0,-1);updatePinDots();}
+
+// ── LOGIN / LOGOUT ──
+function loginMember(m){
+  selectedMember=m;
+  cart=[];
+  // Show banner
+  const c=gc(m);
+  document.getElementById('mb-av').style.cssText=`background:${c.bg};color:${c.text};border:1px solid ${c.border};`;
+  document.getElementById('mb-av').textContent=ini(m.name);
+  document.getElementById('mb-name').textContent=m.name;
+  document.getElementById('mb-debt').textContent=(m.debt||0)>0?'Dluh: '+(m.debt||0)+' Kč':'Bez dluhu ✓';
+  document.getElementById('member-banner').classList.add('show');
+  renderProducts();
+  renderCart();
+  showTab('order');
+}
+
+function logout(){
+  selectedMember=null; cart=[];
+  document.getElementById('member-banner').classList.remove('show');
+  renderCart();
+  document.getElementById('no-member-msg').style.display='flex';
+  document.getElementById('products-container').style.display='none';
+  document.getElementById('btn-repeat').style.display='none';
+  showTab('members');
+  renderMembers();
+}
+
+// ── MEMBERS ──
 function filterMembers(){
   const q=document.getElementById('member-search').value.toLowerCase();
   renderMembers(members.filter(m=>m.name.toLowerCase().includes(q)||(m.nick||'').toLowerCase().includes(q)));
@@ -412,21 +598,30 @@ function renderMembers(list){
   g.innerHTML=list.map(m=>{
     const c=gc(m),sel=selectedMember&&selectedMember.id===m.id;
     const high=(m.debt||0)>=DEBT_DANGER,warn=(m.debt||0)>=DEBT_WARN&&!high;
-    return`<div class="member-card${sel?' selected':''}" onclick="selectMember('${m.id}')">
+    const hasPin=memberHasPin(m.id);
+    return`<div class="member-card${sel?' selected':''}" onclick="handleMemberClick('${m.id}')">
       ${high?'<div class="debt-dot"></div>':''}
       <div class="av" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${ini(m.name)}</div>
       <div class="member-name">${m.nick||m.name.split(' ')[0]}</div>
       <div class="member-family">${m.family||''}</div>
       <div class="member-bal ${high?'bal-danger':warn?'bal-warn':'bal-ok'}">${(m.debt||0)>0?'-'+(m.debt||0)+' Kč':'✓ bez dluhu'}</div>
+      ${hasPin?'<div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px">🔒 PIN</div>':'<div style="font-size:9px;color:var(--amber);font-family:var(--mono);margin-top:3px">bez PINu</div>'}
     </div>`;
   }).join('');
 }
 
-function selectMember(id){
-  selectedMember=members.find(m=>m.id===id);
-  cart=[];renderMembers();renderProducts();renderCart();showTab('order');
+function handleMemberClick(id){
+  const m=members.find(x=>x.id===id);
+  if(!m) return;
+  if(memberHasPin(m.id)){
+    openPinOverlay(m,'verify');
+  } else {
+    // První přihlášení — nastav PIN
+    openPinOverlay(m,'setup');
+  }
 }
 
+// ── PRODUCTS ──
 function renderProducts(){
   if(!selectedMember)return;
   const c=gc(selectedMember);
@@ -453,17 +648,16 @@ function renderProducts(){
   con.innerHTML=html;
 }
 
+// ── CART ──
 function addToCart(name,price,emoji){
   const ex=cart.find(i=>i.name===name);
   if(ex)ex.qty++;else cart.push({name,price,emoji,qty:1});
   renderCart();
 }
-
 function removeFromCart(idx){
   if(cart[idx].qty>1)cart[idx].qty--;else cart.splice(idx,1);
   renderCart();
 }
-
 function renderCart(){
   const con=document.getElementById('cart-items');
   const total=cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -505,24 +699,23 @@ async function confirmOrder(){
   await sync('transaction',{memberId:selectedMember.id,memberName:selectedMember.name,items:itemStr,note,amount:total,timestamp:ts});
   toast(`✓ ${selectedMember.nick||selectedMember.name} · ${total} Kč`);
   document.getElementById('cart-note').value='';
-  cart=[];selectedMember=null;renderCart();
-  document.getElementById('no-member-msg').style.display='flex';
-  document.getElementById('products-container').style.display='none';
-  document.getElementById('btn-repeat').style.display='none';
-  showTab('members');renderMembers();
+  cart=[];renderCart();
+  // Update banner
+  document.getElementById('mb-debt').textContent=(m.debt||0)>0?'Dluh: '+(m.debt||0)+' Kč':'Bez dluhu ✓';
 }
 
 function clearOrder(){
-  cart=[];selectedMember=null;renderCart();
+  cart=[];renderCart();
   document.getElementById('cart-note').value='';
-  document.getElementById('no-member-msg').style.display='flex';
-  document.getElementById('products-container').style.display='none';
-  document.getElementById('btn-repeat').style.display='none';
-  showTab('members');renderMembers();
 }
 
+// ── HISTORY ──
 function renderHistory(){
   const names=[...new Set(transactions.map(t=>t.member))];
+  // If logged in, show only own history by default
+  if(selectedMember && historyFilter==='all'){
+    historyFilter=selectedMember.name;
+  }
   document.getElementById('history-filters').innerHTML=
     `<button class="filter-btn${historyFilter==='all'?' active':''}" onclick="setHF('all',this)">Všichni</button>`
     +names.map(n=>`<button class="filter-btn${historyFilter===n?' active':''}" onclick="setHF('${n}',this)">${n.split(' ')[0]}</button>`).join('');
@@ -541,6 +734,8 @@ function renderHistoryList(){
     ?'<p style="color:var(--text3);text-align:center;padding:30px;font-family:var(--mono);font-size:12px">žádné záznamy</p>'
     :list.map(t=>{
       const m=members.find(x=>x.id===t.memberId)||{colorIdx:0};const c=gc(m);
+      // Can delete only own transactions (or if no one logged in = admin view)
+      const canDelete=!selectedMember||(selectedMember&&selectedMember.id===t.memberId);
       return`<div class="hi">
         <div class="hi-av" style="background:${c.bg};color:${c.text}">${ini(t.member)}</div>
         <div class="hi-info">
@@ -551,7 +746,7 @@ function renderHistoryList(){
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
           <div class="hi-amt">−${t.amount} Kč</div>
-          <button onclick="deleteTx('${t.id}')" style="background:var(--red-dim);border:none;color:var(--red);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px;font-family:var(--mono)">smazat</button>
+          ${canDelete?`<button onclick="deleteTx('${t.id}')" style="background:var(--red-dim);border:none;color:var(--red);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px;font-family:var(--mono)">smazat</button>`:''}
         </div>
       </div>`;
     }).join('');
@@ -564,9 +759,12 @@ async function deleteTx(id){
   if(m){m.debt=Math.max(0,(m.debt||0)-t.amount);m.spent=Math.max(0,(m.spent||0)-t.amount);}
   transactions=transactions.filter(x=>x.id!==id);
   await sync('deleteTransaction',{transactionId:id,memberName:t.member,items:t.items,amount:t.amount,originalTs:t.ts,deletedAt:new Date().toISOString(),deletedAtLocal:new Date().toLocaleString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})});
-  renderHistoryList();renderMembers();renderAdmin();toast('🗑️ Smazáno · audit log uložen');
+  renderHistoryList();renderMembers();
+  if(selectedMember) document.getElementById('mb-debt').textContent=(members.find(x=>x.id===selectedMember.id)?.debt||0)>0?'Dluh: '+members.find(x=>x.id===selectedMember.id).debt+' Kč':'Bez dluhu ✓';
+  toast('🗑️ Smazáno');
 }
 
+// ── ADMIN ──
 function renderAdmin(){
   const td=members.reduce((s,m)=>s+(m.debt||0),0);
   const ts=members.reduce((s,m)=>s+(m.spent||0),0);
@@ -577,7 +775,7 @@ function renderAdmin(){
     <div class="stat-box"><div class="stat-val">${id}</div><div class="stat-lbl">V DLUHU</div></div>`;
   const wd=[...members].filter(m=>(m.debt||0)>0).sort((a,b)=>b.debt-a.debt);
   document.getElementById('admin-debts').innerHTML=`<div class="section-hd"><div class="dot" style="background:var(--red)"></div>PŘEHLED DLUHŮ</div>`
-    +( wd.map(m=>{const c=gc(m);const high=(m.debt||0)>=DEBT_DANGER;
+    +(wd.map(m=>{const c=gc(m);const high=(m.debt||0)>=DEBT_DANGER;
       return`<div class="debt-row">
         <div style="display:flex;align-items:center;gap:8px">
           <div style="width:28px;height:28px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${ini(m.name)}</div>
@@ -585,7 +783,7 @@ function renderAdmin(){
         </div>
         <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${high?'var(--red)':'var(--amber)'}">${(m.debt||0).toLocaleString('cs')} Kč</div>
       </div>`;
-    }).join('')||'<p style="font-size:12px;color:var(--text3);font-family:var(--mono)">žádné dluhy 🎉</p>');
+    }).join(''))||'<p style="font-size:12px;color:var(--text3);font-family:var(--mono)">žádné dluhy 🎉</p>';
   const medals=['🥇','🥈','🥉','4','5'];
   const lb=[...members].sort((a,b)=>(b.spent||0)-(a.spent||0)).slice(0,5);
   document.getElementById('admin-lb').innerHTML=`<div class="section-hd"><div class="dot" style="background:var(--amber)"></div>LEADERBOARD</div>`
@@ -600,6 +798,7 @@ function renderAdmin(){
     }).join('');
 }
 
+// ── MEMBER MANAGEMENT ──
 function showAddMember(){openModal('modal-member');}
 async function addMember(){
   const name=document.getElementById('new-name').value.trim();
@@ -615,16 +814,30 @@ async function addMember(){
 }
 
 function showManageMembers(){
-  const con=document.getElementById('manage-list');
-  con.innerHTML=members.map((m,i)=>{const c=gc(m);
+  const pins=getPins();
+  document.getElementById('manage-list').innerHTML=members.map((m,i)=>{const c=gc(m);
     return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
       <div style="width:36px;height:36px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${ini(m.name)}</div>
-      <div style="flex:1"><div style="font-size:13px;font-weight:600">${m.name}</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${m.family||''} · dluh: ${m.debt||0} Kč</div></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${m.name}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${m.family||''} · dluh: ${m.debt||0} Kč · ${pins[m.id]?'🔒 PIN nastaven':'bez PINu'}</div>
+      </div>
+      <button onclick="resetMemberPin('${m.id}')" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:11px;margin-right:4px" title="Reset PIN">🔑</button>
       <button onclick="editMember(${i})" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:12px;margin-right:4px">✏️</button>
       <button onclick="deleteMember('${m.id}')" style="background:var(--red-dim);border:none;color:var(--red);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:12px">🗑️</button>
     </div>`;
   }).join('');
   openModal('modal-manage');
+}
+
+function resetMemberPin(id){
+  const m=members.find(x=>x.id===id);
+  if(!m||!confirm(`Reset PIN pro ${m.name}?\nČlen si nastaví nový při příštím přihlášení.`))return;
+  const pins=getPins();
+  delete pins[id];
+  savePins(pins);
+  showManageMembers();
+  toast(`🔑 PIN pro ${m.name} resetován`);
 }
 
 function editMember(i){
@@ -641,10 +854,12 @@ async function deleteMember(id){
   const m=members.find(x=>x.id===id);
   if(!m||!confirm(`Smazat ${m.name}?`))return;
   members=members.filter(x=>x.id!==id);
+  const pins=getPins();delete pins[id];savePins(pins);
   await sync('deleteMember',{id});
   showManageMembers();renderMembers();renderAdmin();toast(`🗑️ ${m.name} smazán`);
 }
 
+// ── TOP UP ──
 function showTopUp(){
   document.getElementById('topup-member').innerHTML=members.map(m=>`<option value="${m.id}">${m.name}${(m.debt||0)>0?' — '+(m.debt||0)+' Kč':''}</option>`).join('');
   openModal('modal-topup');
@@ -661,12 +876,14 @@ async function topUp(){
   toast(`✓ Platba ${amt} Kč — ${m.name}`);renderMembers();renderAdmin();
 }
 
+// ── QR ──
 function showQR(){
   document.getElementById('qr-url').textContent=APP_URL;
   document.getElementById('qr-container').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(APP_URL)}&bgcolor=161a17&color=3ddc84&qzone=2" style="border-radius:10px" alt="QR">`;
   openModal('modal-qr');
 }
 
+// ── PRODUCTS ──
 function showProducts(){
   const all=Object.entries(products).flatMap(([cat,items])=>items.map(p=>({...p,cat})));
   document.getElementById('products-list').innerHTML=all.length===0
@@ -699,6 +916,7 @@ async function deleteProduct(name,cat){
   showProducts();
 }
 
+// ── EXPORT ──
 function exportCSV(){
   const bom='\uFEFF';
   const mR=[['Jméno','Dluh','Útrata']];members.forEach(m=>mR.push([m.name,m.debt||0,m.spent||0]));
@@ -708,6 +926,7 @@ function exportCSV(){
   a.click();toast('📥 CSV exportováno');
 }
 
+// ── HELPERS ──
 function openModal(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function toast(msg,err=false){
@@ -721,11 +940,8 @@ document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('cli
 setInterval(updateClock,15000);
 setInterval(()=>loadData(),60000);
 updateClock();
-
-// Load logo from Sheets or use text fallback
 document.getElementById('logo-img').onerror=function(){this.style.display='none';};
 document.getElementById('logo-img').src='data:image/png;base64,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';
-
 loadData();
 </script>
 </body>
