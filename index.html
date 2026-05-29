@@ -220,7 +220,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
     </div>
     <div class="topbar-right">
       <div class="clock" id="clock">--:--</div>
-      <button class="btn-sm" onclick="showTab('admin')">ADMIN</button>
+      <button class="btn-sm" id="admin-btn" onclick="handleAdminClick()">ADMIN</button>
     </div>
   </div>
 
@@ -445,7 +445,9 @@ const DEFAULT_PRODUCTS={
 };
 
 let members=[],products={},transactions=[],selectedMember=null,cart=[],historyFilter='all';
-let pinTarget=null,pinEntry='',pinMode='verify'; // pinMode: verify | setup
+let pinTarget=null,pinEntry='',pinMode='verify'; // pinMode: verify | setup | admin
+let isAdmin=false;
+const ADMIN_PIN='0000'; // Změň v kódu na svůj PIN
 
 function gc(m){return COLORS[(m.colorIdx||0)%COLORS.length];}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
@@ -465,8 +467,10 @@ async function loadPins(){
   try{
     const res=await fetch(SCRIPT_URL+'?action=getPins&t='+Date.now());
     const data=await res.json();
-    pinsCache=data.pins||{};
-  }catch(e){}
+    if(data.pins) pinsCache=data.pins;
+  }catch(e){
+    // keep existing cache on error
+  }
 }
 
 async function savePin(memberId, pin){
@@ -504,6 +508,24 @@ async function sync(action,data){
     await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...data})});
     setSyncStatus('ok','synchronizováno · '+new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setSyncStatus('err','chyba zápisu');}
+}
+
+function handleAdminClick(){
+  if(isAdmin){
+    showTab('admin');
+  } else {
+    // Show admin PIN overlay
+    pinTarget={id:'__admin__',name:'Admin',nick:'Admin',colorIdx:0};
+    pinMode='admin';
+    pinEntry='';
+    const overlay=document.getElementById('pin-overlay');
+    document.getElementById('pin-av-wrap').innerHTML='<div style="width:60px;height:60px;border-radius:50%;background:#0d3d24;color:#3ddc84;border:2px solid #1f6e42;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px">⚙️</div>';
+    document.getElementById('pin-member-name').textContent='ADMIN';
+    document.getElementById('pin-member-sub').textContent='Zadej admin PIN';
+    document.getElementById('pin-error').textContent='';
+    updatePinDots();
+    overlay.classList.add('show');
+  }
 }
 
 function showTab(n){
@@ -544,7 +566,23 @@ async function pinPress(d){
   updatePinDots();
   if(pinEntry.length===4){
     setTimeout(async ()=>{
-      if(pinMode==='verify'){
+      if(pinMode==='admin'){
+        if(pinEntry===ADMIN_PIN){
+          isAdmin=true;
+          document.getElementById('admin-btn').textContent='✓ ADMIN';
+          document.getElementById('admin-btn').style.borderColor='var(--green)';
+          document.getElementById('admin-btn').style.color='var(--green)';
+          const overlay=document.getElementById('pin-overlay');
+          overlay.classList.remove('show');
+          overlay.style.display='none';
+          setTimeout(()=>{overlay.style.display='';},300);
+          showTab('admin');
+          toast('✓ Admin režim zapnut');
+        } else {
+          document.getElementById('pin-error').textContent='Špatný PIN';
+          pinEntry='';updatePinDots();
+        }
+      } else if(pinMode==='verify'){
         const hash=await hashPin(pinEntry);
         if(hash===String(pinsCache[pinTarget.id])){
           loginMember(pinTarget);
@@ -599,8 +637,13 @@ function loginMember(m){
 }
 
 function logout(){
-  selectedMember=null; cart=[];
+  selectedMember=null; cart=[]; isAdmin=false;
   document.getElementById('member-banner').classList.remove('show');
+  const adminBtn=document.getElementById('admin-btn');
+  adminBtn.textContent='ADMIN';
+  adminBtn.style.borderColor='';
+  adminBtn.style.color='';
+  historyFilter='all';
   renderCart();
   document.getElementById('no-member-msg').style.display='flex';
   document.getElementById('products-container').style.display='none';
@@ -634,9 +677,11 @@ function renderMembers(list){
   }).join('');
 }
 
-function handleMemberClick(id){
+async function handleMemberClick(id){
   const m=members.find(x=>x.id===id);
   if(!m) return;
+  // Refresh pins from Sheets before checking
+  await loadPins();
   if(memberHasPin(m.id)){
     openPinOverlay(m,'verify');
   } else {
@@ -736,8 +781,8 @@ function clearOrder(){
 // ── HISTORY ──
 function renderHistory(){
   const names=[...new Set(transactions.map(t=>t.member))];
-  // If logged in, show only own history by default
-  if(selectedMember && historyFilter==='all'){
+  // Admin sees all, member sees own by default
+  if(!isAdmin && selectedMember && historyFilter==='all'){
     historyFilter=selectedMember.name;
   }
   document.getElementById('history-filters').innerHTML=
@@ -759,7 +804,7 @@ function renderHistoryList(){
     :list.map(t=>{
       const m=members.find(x=>x.id===t.memberId)||{colorIdx:0};const c=gc(m);
       // Can delete only own transactions (or if no one logged in = admin view)
-      const canDelete=!selectedMember||(selectedMember&&selectedMember.id===t.memberId);
+      const canDelete=isAdmin||(selectedMember&&selectedMember.id===t.memberId);
       return`<div class="hi">
         <div class="hi-av" style="background:${c.bg};color:${c.text}">${ini(t.member)}</div>
         <div class="hi-info">
