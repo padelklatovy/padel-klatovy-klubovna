@@ -280,7 +280,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);height:
     <div class="admin-scroll">
       <div class="stats-row" id="admin-stats"></div>
       <div class="section" id="admin-debts"></div>
-      <div class="section" id="admin-lb"></div>
+
       <div class="section">
         <div class="section-hd"><div class="dot"></div>AKCE</div>
         <div class="actions">
@@ -366,12 +366,12 @@ const COLORS=[
 ];
 const DEFAULT_PRODUCTS={
   'Oblíbené':[
-    {name:'Prazdroj 12° čep. 0,33',price:38,emoji:'🍺'},
+    {name:'Prazdroj 12° čep. 0,33',price:45,emoji:'🍺'},
     {name:'Prazdroj 12° čep. 0,5',price:55,emoji:'🍺'},
     {name:'Birel Pomelo Grep 0,3',price:32,emoji:'🍋'},
-    {name:'Magnesia plus',price:55,emoji:'💧'},
-    {name:'Coca Cola 0,33',price:55,emoji:'🥤'},
-    {name:'Aperol Spritz',price:70,emoji:'🍊'},
+    {name:'Espresso',price:55,emoji:'☕'},
+    {name:'Cappuccino',price:65,emoji:'☕'},
+    {name:'Magnesia plus',price:45,emoji:'💧'},
   ],
   'Pivo':[
     {name:'Prazdroj 12° čep. 0,33',price:38,emoji:'🍺'},
@@ -694,7 +694,7 @@ function renderMembers(list){
       <div class="av" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${ini(m.name)}</div>
       <div class="member-name">${m.nick||m.name.split(' ')[0]}</div>
       <div class="member-family">${m.family||''}</div>
-      <div class="member-bal ${high?'bal-danger':warn?'bal-warn':'bal-ok'}">${(m.debt||0)>0?'-'+(m.debt||0)+' Kč':'✓ bez dluhu'}</div>
+      <div class="member-bal ${selectedMember&&selectedMember.id===m.id?(high?'bal-danger':warn?'bal-warn':'bal-ok'):'bal-ok'}">${selectedMember&&selectedMember.id===m.id?((m.debt||0)>0?'-'+(m.debt||0)+' Kč':'✓ bez dluhu'):''}</div>
       ${hasPin?'<div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px">🔒 PIN</div>':'<div style="font-size:9px;color:var(--amber);font-family:var(--mono);margin-top:3px">bez PINu</div>'}
     </div>`;
   }).join('');
@@ -896,18 +896,7 @@ function renderAdmin(){
         <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${high?'var(--red)':'var(--amber)'}">${(m.debt||0).toLocaleString('cs')} Kč</div>
       </div>`;
     }).join(''))||'<p style="font-size:12px;color:var(--text3);font-family:var(--mono)">žádné dluhy 🎉</p>';
-  const medals=['🥇','🥈','🥉','4','5'];
-  const lb=[...members].sort((a,b)=>(b.spent||0)-(a.spent||0)).slice(0,5);
-  document.getElementById('admin-lb').innerHTML=`<div class="section-hd"><div class="dot" style="background:var(--amber)"></div>LEADERBOARD</div>`
-    +lb.map((m,i)=>{const c=gc(m);
-      return`<div class="lb-row">
-        <div style="width:22px;font-weight:800;color:var(--text3)">${medals[i]}</div>
-        <div style="width:32px;height:32px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">${ini(m.name)}</div>
-        <div style="flex:1;font-size:13px">${m.name}</div>
-        <div style="font-family:var(--mono);font-size:13px;color:var(--text2)">${(m.spent||0).toLocaleString('cs')} Kč</div>
-        ${i===0?'<span>🏆</span>':''}
-      </div>`;
-    }).join('');
+
 }
 
 // ── MEMBER MANAGEMENT ──
