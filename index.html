@@ -236,6 +236,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div class="mb-name" id="mb-name"></div>
       <div class="mb-debt" id="mb-debt"></div>
     </div>
+    <button class="mb-pay" id="mb-pay" onclick="showPaymentQR()" style="font-family:var(--mono);font-size:11px;color:#fff;background:var(--red);cursor:pointer;padding:6px 10px;border:none;border-radius:6px;margin-right:6px;display:none">💳 Zaplatit</button>
     <button class="mb-logout" onclick="logout()">Odhlásit</button>
   </div>
 
@@ -350,6 +351,18 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="modal-title">Správa členů</div>
     <div id="manage-list" style="max-height:350px;overflow-y:auto;margin-bottom:14px"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-manage')">Zavřít</button></div>
+  </div>
+</div>
+
+<!-- MODAL: PLATBA QR -->
+<div class="modal-overlay" id="modal-payment-qr">
+  <div class="modal" style="text-align:center;max-width:340px">
+    <div class="modal-title">💳 Zaplatit dluh</div>
+    <div id="payment-qr-info" style="margin-bottom:16px;font-size:13px;color:var(--text2);font-family:var(--mono)"></div>
+    <div id="payment-qr-code" style="margin:0 auto 12px;display:inline-block"></div>
+    <p style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:8px">Naskenuj v mobilním bankovnictví</p>
+    <p style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Účet: 250226176/0300 · ČSOB</p>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('modal-payment-qr')">Zavřít</button></div>
   </div>
 </div>
 
@@ -646,7 +659,9 @@ function loginMember(m){
   document.getElementById('mb-av').style.cssText=`background:${c.bg};color:${c.text};border:1px solid ${c.border};`;
   document.getElementById('mb-av').textContent=ini(m.name);
   document.getElementById('mb-name').textContent=m.name;
-  document.getElementById('mb-debt').textContent=(m.debt||0)>0?'Dluh: '+(m.debt||0)+' Kč':'Bez dluhu ✓';
+  const mbDebt = (m.debt||0);
+  document.getElementById('mb-debt').textContent=mbDebt>0?'Dluh: '+mbDebt+' Kč':'Bez dluhu ✓';
+  document.getElementById('mb-pay').style.display=mbDebt>0?'block':'none';
   document.getElementById('member-banner').classList.add('show');
   renderProducts();
   renderCart();
@@ -812,6 +827,7 @@ async function confirmOrder(){
   cart=[];renderCart();
   // Update banner
   document.getElementById('mb-debt').textContent=(m.debt||0)>0?'Dluh: '+(m.debt||0)+' Kč':'Bez dluhu ✓';
+  document.getElementById('mb-pay').style.display=(m.debt||0)>0?'block':'none';
 }
 
 function clearOrder(){
@@ -1048,6 +1064,39 @@ function backupData(){
   a.download=filename;
   a.click();
   toast('Zaloha stazena');
+}
+
+function showPaymentQR(){
+  if(!selectedMember) return;
+  const debt = selectedMember.debt || 0;
+  if(debt <= 0){ toast('Nemáš žádný dluh!'); return; }
+
+  // Czech QR Platba format (Short payment descriptor - SPD)
+  const iban = 'CZ5503000000000250226176';
+  const amount = debt.toFixed(2);
+  const msg = 'Padel Klatovy Bar - ' + selectedMember.name;
+  const vs = ''; // variabilni symbol - volitelne
+
+  // SPD string
+  const spd = [
+    'SPD*1.0',
+    'ACC:' + iban,
+    'AM:' + amount,
+    'CC:CZK',
+    'MSG:' + msg.substring(0, 60),
+  ].join('*');
+
+  document.getElementById('payment-qr-info').innerHTML =
+    '<strong style="color:var(--text);font-size:16px">' + debt + ' Kč</strong><br>' +
+    '<span>' + selectedMember.name + '</span>';
+
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+    encodeURIComponent(spd) + '&bgcolor=131810&color=ffffff&qzone=2';
+
+  document.getElementById('payment-qr-code').innerHTML =
+    '<img src="' + qrUrl + '" style="border-radius:10px;display:block" alt="QR platba" />';
+
+  openModal('modal-payment-qr');
 }
 
 function exportCSV(){
