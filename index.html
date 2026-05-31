@@ -900,13 +900,22 @@ function clearOrder(){
 // ── HISTORY ──
 function renderHistory(){
   const names=[...new Set(transactions.map(t=>t.member))];
-  // Admin sees all, member sees own by default
-  if(!isAdmin && selectedMember && historyFilter==='all'){
+
+  if(isAdmin){
+    // Admin vidí vše + filtry
+    document.getElementById('history-filters').innerHTML=
+      `<button class="filter-btn${historyFilter==='all'?' active':''}" onclick="setHF('all',this)">Všichni</button>`
+      +names.map(n=>`<button class="filter-btn${historyFilter===n?' active':''}" onclick="setHF('${n}',this)">${n.split(' ')[0]}</button>`).join('');
+  } else if(selectedMember){
+    // Člen vidí jen svoje — žádné filtry
     historyFilter=selectedMember.name;
+    document.getElementById('history-filters').innerHTML=
+      `<span style="font-family:var(--mono);font-size:12px;color:var(--text2);padding:4px 0">Moje objednávky</span>`;
+  } else {
+    // Nikdo nepřihlášen — prázdné
+    historyFilter='all';
+    document.getElementById('history-filters').innerHTML='';
   }
-  document.getElementById('history-filters').innerHTML=
-    `<button class="filter-btn${historyFilter==='all'?' active':''}" onclick="setHF('all',this)">Všichni</button>`
-    +names.map(n=>`<button class="filter-btn${historyFilter===n?' active':''}" onclick="setHF('${n}',this)">${n.split(' ')[0]}</button>`).join('');
   renderHistoryList();
 }
 
@@ -917,7 +926,14 @@ function setHF(f,btn){
 }
 
 function renderHistoryList(){
-  const list=historyFilter==='all'?transactions:transactions.filter(t=>t.member===historyFilter);
+  let list;
+  if(isAdmin){
+    list=historyFilter==='all'?transactions:transactions.filter(t=>t.member===historyFilter);
+  } else if(selectedMember){
+    list=transactions.filter(t=>t.memberId===selectedMember.id);
+  } else {
+    list=[];
+  }
   document.getElementById('history-list').innerHTML=list.length===0
     ?'<p style="color:var(--text3);text-align:center;padding:30px;font-family:var(--mono);font-size:12px">žádné záznamy</p>'
     :list.map(t=>{
